@@ -1,0 +1,88 @@
+@font-face {
+     font-family: Optima_Regular;
+     src: url(unicode.optima.ttf);
+}
+
+body{
+   font-family: Optima_Regular;
+   padding: 0;
+   margin: 0;
+}
+h1, h2, h3, h4, h5, h6, p {
+    padding: 0;
+    margin: 0;
+}
+a:hover { text-decoration: none }
+a:focus { outline: 0 solid; text-decoration: none}
+input:focus, button:focus, textarea:focus, a:focus {outline: none}
+ul,ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+img{
+    max-width:100%;
+}
+p{
+    font-size: 16px;
+    line-height: 28px;
+	letter-spacing: 0.7px;
+}
+.row {
+    position: fixed;
+    top: 50%;
+    left: 10%;
+    right: 10%;
+    transform: translate(0%, -50%);
+    vertical-align: middle;
+    max-width: 1300px;
+}
+.main-section {
+	/* padding: 100px 0px; */
+	position: absolute;
+	top: 25%;
+}
+.right {
+	position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.right h1 {
+	font-size: 75px;
+	letter-spacing: 12px;
+	margin-bottom: 21px;
+}
+.right h1 span {
+	font-weight: bold;
+}
+.social-icons i {
+	font-size: 45px;
+	margin-right: 20px;
+	margin-bottom: 20px;
+	color: #999999;
+}
+.si:hover{
+	color: #666666;
+}
+
+
+/* Wide Mobile Layout: 400px. */
+@media only screen and (min-width: 400px) and (max-width: 767px) { 
+	.main-section {
+	padding: 50px 0px;
+	position: absolute;
+	top: 0%;
+}
+.right {
+	margin-bottom: 35px;
+}
+.right h1 {
+	font-size: 57px;
+	letter-spacing: 9px;
+	margin-bottom: 21px;
+}.social-icons i {
+	font-size: 40px;
+	margin-right: 12px;
+	margin-bottom: 12px;
+}
+}
