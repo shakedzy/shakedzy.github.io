@@ -35,10 +35,9 @@ p{
     right: 10%;
     transform: translate(0%, -50%);
     vertical-align: middle;
-    max-width: 1300px;
+    text-align: center;
 }
 .main-section {
-	/* padding: 100px 0px; */
 	position: absolute;
 	top: 25%;
 }
@@ -57,18 +56,15 @@ p{
 }
 .social-icons i {
 	font-size: 45px;
-	margin-right: 20px;
-	margin-bottom: 20px;
+	margin: 15px;
 	color: #999999;
 }
 .si:hover{
 	color: #666666;
 }
 
-
-/* Wide Mobile Layout: 400px. */
-@media only screen and (min-width: 400px) and (max-width: 767px) { 
-	.main-section {
+@media only screen and (min-width: 300px) and (max-width: 767px) { 
+.main-section {
 	padding: 50px 0px;
 	position: absolute;
 	top: 0%;
@@ -80,9 +76,7 @@ p{
 	font-size: 57px;
 	letter-spacing: 9px;
 	margin-bottom: 21px;
-}.social-icons i {
-	font-size: 40px;
-	margin-right: 12px;
-	margin-bottom: 12px;
 }
+.social-icons {
+	margin: 30px;
 }
