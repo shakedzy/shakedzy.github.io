@@ -59,19 +59,49 @@ p{
 	margin: 15px;
 	color: #999999;
 }
-.si:hover{
+/*.si:hover{
 	color: #666666;
+}*/
+.fa-linkedin:hover {
+    color: #0966C2;
+}
+.fa-medium:hover {
+    color: #000000;
+}
+.fa-github:hover {
+    color: #7F278F;
+}
+.fa-goodreads:hover {
+    color: #cf8744;
+}
+.fa-instagram:hover {
+    color: #D94184;
+}
+.fa-twitter:hover {
+    color: #1DA1F2;
+}
+.fa-camera-retro:hover {
+    color: #19191a;
+}
+.fa-at:hover {
+    color: #C11212;
 }
 .vivino {
-    margin-bottom: 25px;
-    margin-left: 10px;
+    margin-top: 15px;
     margin-right: 10px;
+    margin-left: 10px;
+    margin-bottom: 13px;
+    padding-top: 2px;
     fill: #999999;
-    width: 40px;
-    height: 45px;
+    width: 45px;
+    height: 47px;
+    vertical-align: top;
 }
 .vivino:hover {
-    fill: #666666;
+    fill: #AA1631;
+}
+.vivino-a:hover .vivino {
+    fill: #AA1631;
 }
 
 @media only screen and (min-width: 300px) and (max-width: 767px) { 
