@@ -124,3 +124,7 @@ p{
 .vivino {
     /*margin-top: 10px;*/
 }
+.row {
+    top: 0%;
+    transform: none;
+}
