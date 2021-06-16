@@ -1,3 +1,7 @@
-syntax: glob
-.idea/*
+_site/
+.sass-cache/
+.jekyll-metadata
+.jekyll-cache
 .DS_Store
+*/.DS_Store
+.idea/*
