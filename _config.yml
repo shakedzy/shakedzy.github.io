@@ -1,0 +1,45 @@
+# Welcome to Jekyll!
+#
+# This config file is meant for settings that affect your whole blog, values
+# which you are expected to set up once and rarely need to edit after that.
+# For technical reasons, this file is *NOT* reloaded automatically when you use
+# 'jekyll serve'. If you change this file, please restart the server process.
+
+# Site settings
+title: shakedzy.xyz
+email: shakedzy@gmail.com
+description: This is me
+full_name: Shaked Zychlinski
+baseurl: "" # the subpath of your site, e.g. /blog
+url: "https://shakedzy.xyz" # the base hostname & protocol for your site
+google_analytics: UA-141245946-1
+favicon: "/favicon.png"
+twitter_username: "@shakedzy"
+
+plugins:
+- jekyll-remote-include
+
+social_banner: 
+  image: "/assets/site/social_banner.jpg"
+  type: "image/jpeg"
+  height: 400
+  width: 600
+
+assets:
+  sources:
+    - _assets/fonts
+    - _assets/site
+
+
+# Build settings
+include: ["_pages"]
+markdown: kramdown
+
+defaults:
+  -
+    scope:
+      path: "photography"
+    values:
+      permalink: /:path/:basename:output_ext
+
+exclude: [LICENSE, LICENSE-CODE.md, LICENSE-IMAGES, README.md, MAKE_YOUR_OWN.md, bower.json]
