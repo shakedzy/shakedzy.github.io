@@ -48,11 +48,22 @@ permalink: /
 
   <div class="one-third-width gallery-preview right" style="padding: 10px; padding-right: 20px; padding-left: 20px; border: 2px solid #999999; border-radius: 25px; margin-bottom: 20px; ">
   	<h4 class="overview-gallery-title">Latest Photo Gallery</h4>
-  	<a href="https://shakedzy.xyz/photo-gallery/galleries/{% remote_include https://shakedzy.xyz/photo-gallery/assets/site/latest/page.txt %}.html">
-  	<img src="https://shakedzy.xyz/photo-gallery/assets/site/latest/img.jpg" style="width: 100%; padding-top: 10px; padding-bottom: 10px"></a>
-  	<a href="https://shakedzy.xyz/photo-gallery/galleries/{% remote_include https://shakedzy.xyz/photo-gallery/assets/site/latest/page.txt %}.html">
-  	<h5><b>{% remote_include https://shakedzy.xyz/photo-gallery/assets/site/latest/title.txt %},</b>
-  		<em>{% remote_include https://shakedzy.xyz/photo-gallery/assets/site/latest/date.txt %}</em></h5></a>
+  	<div id="pg"></div>
+  	<script type="text/javascript">
+		function fetchData(){
+			fetch('https://raw.githubusercontent.com/shakedzy/photo-gallery/master/assets/site/latest/params.json')
+				.then((response) => response.json())
+			    .then((data) => {
+			    	console.log(data);
+			      document.getElementById("pg").innerHTML = '<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
+			      	'<img src="https://shakedzy.xyz/photo-gallery/assets/photography/' + data['img'] + '" style="width: 100%; padding-top: 10px; padding-bottom: 10px"></a>' +
+			      	'<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html" style="color: black">' +
+			      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>';
+			    })
+		}
+		fetchData()
+		</script>
+
   </div>
 
 </div>
