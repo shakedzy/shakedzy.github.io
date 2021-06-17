@@ -16,9 +16,6 @@ google_analytics: UA-141245946-1
 favicon: "/favicon.png"
 twitter_username: "@shakedzy"
 
-plugins:
-- jekyll-remote-include
-
 social_banner: 
   image: "/assets/site/social_banner.jpg"
   type: "image/jpeg"
