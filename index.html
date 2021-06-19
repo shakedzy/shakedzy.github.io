@@ -8,7 +8,7 @@ permalink: /
 <h1 style="font-weight: bold; text-align: center; font-family: 'Helvetica Neue'; font-weight: lighter;">{{ page.title }}</h1>
 <div class="social-icons" style="text-align: center;">
 	<a href="https://www.linkedin.com/in/shakedzy/" title="LinkedIn"><i class="fab fa-linkedin si"></i></a>
-	<a href="https://medium.com/@shakedzy" title="Medium"><i class="fab fa-medium si"></i></a>
+	<a href="https://shakedzy.medium.com/" title="Medium"><i class="fab fa-medium si"></i></a>
 	<a href="https://github.com/shakedzy" title="GitHub"><i class="fab fa-github si"></i></a>
 	<a href="https://www.instagram.com/shakedzy/" title="Instagram"><i class="fab fa-instagram si"></i></a>
     <a href="https://www.goodreads.com/shakedzy" title="Goodreads"><i class="fab fa-goodreads si"></i></a>
@@ -18,14 +18,14 @@ permalink: /
 	</svg></a>
 	<a href="https://shakedzy.xyz/photo-gallery" title="My Photo Gallery"><i class="fa fa-camera-retro si"></i></a>
 	<a href="mailto:shakedzy@gmail.com" title="Email"><i class="fas fa-at"></i></a>
+
+	<br><br><hr style="width: 40%; border-color: black; margin: auto; "><br><br><br>
+
 </div>
 
-<br><br>
-
 <div class="row" style="margin-left: 0">
-
   <div class="one-third-width gallery-preview left" style="padding: 10px; border: 2px solid #999999; border-radius: 25px; margin-bottom: 20px; ">
-  	<h4 class="overview-gallery-title">Dython</h4>
+  	<h4 class="overview-gallery-title">Looking for Dython?</h4>
   	  <a href="https://shakedzy.xyz/dython">
 	  <img src="https://raw.githubusercontent.com/shakedzy/dython/master/logos/dython_300x200.png" style="width: 100%; padding-top: 10px; padding-bottom: 10px">
 	  </a><br>
@@ -45,7 +45,7 @@ permalink: /
   	<h4 class="overview-gallery-title">Latest on Medium</h4>
 	<div id="medium-widget"></div>
     <script src="https://medium-widget.pixelpoint.io/widget.js"></script>
-    <script>MediumWidget.Init({renderTo: '#medium-widget', params: {"resource":"https://medium.com/@shakedzy","postsPerLine":1,"limit":1,"picture":"big","fields":["description","author","claps","publishAt"],"ratio":"landscape"}})</script>
+    <script>MediumWidget.Init({renderTo: '#medium-widget', params: {"resource":"https://medium.com/@shakedzy","postsPerLine":1,"limit":2,"picture":"big","fields":["description","author","claps","publishAt"],"ratio":"landscape"}})</script>
     </a>
   </div>
 
@@ -61,12 +61,11 @@ permalink: /
 			      document.getElementById("pg").innerHTML = '<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
 			      	'<img src="https://shakedzy.xyz/photo-gallery/assets/photography/' + data['img'] + '" style="width: 100%; padding-top: 10px; padding-bottom: 10px"></a>' +
 			      	'<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
-			      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>';
+			      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>' + data['desc'];
 			    })
 		}
 		fetchData()
 		</script>
-
   </div>
 
 </div>
