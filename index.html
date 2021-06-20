@@ -59,7 +59,7 @@ permalink: /
 			    .then((data) => {
 			    	console.log(data);
 			      document.getElementById("pg").innerHTML = '<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
-			      	'<img src="https://shakedzy.xyz/photo-gallery/assets/photography/' + data['img'] + '" style="width: 100%; padding-top: 10px; padding-bottom: 10px"></a>' +
+			      	'<img src="https://shakedzy.xyz/photo-gallery/assets/photography/' + data['img'] + '" class="pg-img"></a>' +
 			      	'<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
 			      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>' + data['desc'];
 			    })
