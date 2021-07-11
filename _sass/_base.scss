@@ -205,6 +205,12 @@ pre {
         padding-right: $spacing-unit / 2;
         padding-left: $spacing-unit / 2;
     }
+
+    @include media-query($on-laptop) {
+        max-width: $content-width-mobile;
+        padding-right: $spacing-unit / 2;
+        padding-left: $spacing-unit / 2;
+    }
 }
 
 
