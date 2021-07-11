@@ -25,6 +25,7 @@ $grey-color-dark:  darken($grey-color, 25%);
 
 // Width of the content area
 $content-width:    80%;
+$content-width-mobile: 90%;
 $content-width-inverse-factor: 1.2;
 
 $on-palm:          600px;
@@ -117,13 +118,13 @@ a.no-deco:hover {
     .half-width {
         @extend .column;
         @media screen and (min-width: $on-palm) {
-            width: 48%;
+            width: 49%;
         }
     }
     .one-third-width {
         @extend .column;
         @media screen and (min-width: $on-palm) {
-            width: 31.3333333%;
+            width: 32.3333333%;
         }
     }
     .one-tenth-width {
@@ -145,15 +146,15 @@ a.no-deco:hover {
     @media screen and (min-width: $on-palm) {
         .left {
             margin-left: 0;
-            margin-right: 2%;
+            margin-right: 1%;
         }
         .right {
-            margin-left: 2%;
+            margin-left: 1%;
             margin-right: 0;
         }
         .center {
-            margin-left: 1%;
-            margin-right: 1%;
+            margin-left: 0.5%;
+            margin-right: 0.5%;
         }
     }
     &::after{
