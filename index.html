@@ -24,49 +24,59 @@ permalink: /
 </div>
 
 <div class="row" style="margin-left: 0">
-  <div class="one-third-width gallery-preview left" style="padding: 15px; border: 2px solid #999999; border-radius: 25px; margin-bottom: 20px; ">
-  	<h4 class="overview-gallery-title">Looking for Dython?</h4>
-  	  <a href="https://shakedzy.xyz/dython">
-	  <img src="https://raw.githubusercontent.com/shakedzy/dython/master/logos/dython_300x200.png" style="width: 100%; padding-top: 10px; padding-bottom: 10px">
-	  </a><br>
-	  <a href="https://pypi.org/project/dython/">
-	  	<img src="https://img.shields.io/pypi/v/dython?style=for-the-badge">
-	  	<img src="https://img.shields.io/pypi/dm/dython?style=for-the-badge">
-	  </a><a href="https://github.com/shakedzy/dython">
-	  	<img src="https://img.shields.io/github/stars/shakedzy/dython?style=for-the-badge">
-	  </a><br><br>
-	  Dython is a set of <b>D</b>ata analysis tools in p<b>YTHON</b> 3.x, which can let you get more insights about your data.
-	  <br><br>
-	  <b><a href="https://shakedzy.xyz/dython"> Documentation </a> | See on <a href="https://github.com/shakedzy/dython">Github</a></b>
-    </a>
-  </div>
+	<div class="one-third-width gallery-column left">
 
-  <div class="one-third-width gallery-preview center" style="padding: 15px; border: 2px solid #999999; border-radius: 25px; margin-bottom: 20px;  ">
-  	<h4 class="overview-gallery-title">Latest on Medium</h4>
-	<div id="medium-widget"></div>
-    <script src="https://medium-widget.pixelpoint.io/widget.js"></script>
-    <script>MediumWidget.Init({renderTo: '#medium-widget', params: {"resource":"https://medium.com/@shakedzy","postsPerLine":1,"limit":2,"picture":"big","fields":["description","author","claps","publishAt"],"ratio":"landscape"}})</script>
-    </a>
-  </div>
+	  	<div class="gallery-preview" style="padding-right: 20px; padding-left: 20px;">
+	   	  <h4 class="overview-gallery-title">Latest Photo Gallery</h4>
+		  <div id="pg"></div>
+		  <script type="text/javascript">
+			function fetchData(){
+				fetch('https://raw.githubusercontent.com/shakedzy/photo-gallery/master/assets/site/latest/params.json')
+					.then((response) => response.json())
+				    .then((data) => {
+				    	console.log(data);
+				      document.getElementById("pg").innerHTML = '<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
+				      	'<img src="https://shakedzy.xyz/photo-gallery/assets/photography/' + data['img'] + '" class="pg-img"></a>' +
+				      	'<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
+				      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>' + data['desc'];
+				    })
+			}
+			fetchData()
+			</script>
+		</div>
+	  
 
-  <div class="one-third-width gallery-preview right" style="padding: 15px; padding-right: 20px; padding-left: 20px; border: 2px solid #999999; border-radius: 25px; margin-bottom: 20px; ">
-  	<h4 class="overview-gallery-title">Latest Photo Gallery</h4>
-  	<div id="pg"></div>
-  	<script type="text/javascript">
-		function fetchData(){
-			fetch('https://raw.githubusercontent.com/shakedzy/photo-gallery/master/assets/site/latest/params.json')
-				.then((response) => response.json())
-			    .then((data) => {
-			    	console.log(data);
-			      document.getElementById("pg").innerHTML = '<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
-			      	'<img src="https://shakedzy.xyz/photo-gallery/assets/photography/' + data['img'] + '" class="pg-img"></a>' +
-			      	'<a href="https://shakedzy.xyz/photo-gallery/galleries/' + data['page']+ '.html">' +
-			      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>' + data['desc'];
-			    })
-		}
-		fetchData()
-		</script>
-  </div>
+	  <div class="gallery-preview" style="width: 100%">
+	  	<h4 class="overview-gallery-title">What I Currently Read</h4>
+	  	  <script src="https://www.goodreads.com/review/custom_widget/117042123.my%20goodreads%20bookshelf:%20currently-reading?cover_position=left&cover_size=medium&num_books=5&order=a&shelf=currently-reading&show_author=1&show_cover=1&show_rating=0&show_review=1&show_tags=0&show_title=1&sort=date_added&widget_bg_color=FFFFFF&widget_bg_transparent=true&widget_border_width=none&widget_id=1626082616&widget_text_color=000000&widget_title_size=small&widget_width=full" type="text/javascript" charset="utf-8"></script>
+	  </div>
+
+	</div>
+
+ 	<div class="one-third-width gallery-column gallery-preview center">
+	  <h4 class="overview-gallery-title">Latest on Medium</h4>
+	  <div id="medium-widget"></div>
+	    <script src="https://medium-widget.pixelpoint.io/widget.js"></script>
+	    <script>MediumWidget.Init({renderTo: '#medium-widget', params: {"resource":"https://medium.com/@shakedzy","postsPerLine":1,"limit":2,"picture":"big","fields":["description","author","claps","publishAt"],"ratio":"landscape"}})</script>
+	    </a>
+	</div>
+
+	<div class="one-third-width gallery-column gallery-preview right">
+	  	<h4 class="overview-gallery-title">Looking for Dython?</h4>
+	  	  <a href="https://shakedzy.xyz/dython">
+		  <img src="https://raw.githubusercontent.com/shakedzy/dython/master/logos/dython_300x200.png" style="width: 100%; padding-top: 10px; padding-bottom: 10px">
+		  </a><br>
+		  <a href="https://pypi.org/project/dython/">
+		  	<img src="https://img.shields.io/pypi/v/dython?style=for-the-badge">
+		  	<img src="https://img.shields.io/pypi/dm/dython?style=for-the-badge">
+		  </a><a href="https://github.com/shakedzy/dython">
+		  	<img src="https://img.shields.io/github/stars/shakedzy/dython?style=for-the-badge">
+		  </a><br><br>
+		  Dython is a set of <b>D</b>ata analysis tools in p<b>YTHON</b> 3.x, which can let you get more insights about your data.
+		  <br><br>
+		  <b><a href="https://shakedzy.xyz/dython"> Documentation </a> | See on <a href="https://github.com/shakedzy/dython">Github</a></b>
+	    </a>
+	</div>
 
 </div>
 
