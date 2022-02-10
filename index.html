@@ -30,7 +30,7 @@ permalink: /
 	   	  <h4 class="overview-gallery-title">Latest Photo Gallery</h4>
 		  <div id="pg"></div>
 		  <script type="text/javascript">
-			function fetchData(){
+			function fetchPhotoGalleryData(){
 				fetch('https://raw.githubusercontent.com/shakedzy/photo-gallery/master/assets/site/latest/params.json')
 					.then((response) => response.json())
 				    .then((data) => {
@@ -41,7 +41,7 @@ permalink: /
 				      	'<h5><b>' + data['title'] + ',</b> <em>' + data['date'] + '</em></h5></a>' + data['desc'];
 				    })
 			}
-			fetchData()
+			fetchPhotoGalleryData()
 			</script>
 		</div>
 	  
@@ -55,10 +55,29 @@ permalink: /
 
  	<div class="one-third-width gallery-column gallery-preview center">
 	  <h4 class="overview-gallery-title">Latest on Medium</h4>
-	  <div id="medium-widget"></div>
-	    <script src="https://medium-widget.pixelpoint.io/widget.js"></script>
-	    <script>MediumWidget.Init({renderTo: '#medium-widget', params: {"resource":"https://medium.com/@shakedzy","postsPerLine":1,"limit":2,"picture":"big","fields":["description","author","claps","publishAt"],"ratio":"landscape"}})</script>
-	    </a>
+	  <div id="medium"></div>
+	  	  <div id="medium"></div>
+	  	  <script type="text/javascript">
+	  	  	function parseDate(dt){
+	  	  		var date = new Date(dt);
+				var dd = String(date.getDate()).padStart(2, '0');
+				var mm = String(date.getMonth() + 1).padStart(2, '0'); //January is 0!
+				var yyyy = date.getFullYear();
+				return mm + '/' + dd + '/' + yyyy;
+	  	  	}
+	  	  	function parseSinglePost(data, idx){
+	  	  		return '<a href="' + data['items'][idx]['link'] + '"><img style="padding-bottom: 5px;" src="' + data['items'][idx]['thumbnail'] + '"></a><br><a href="' + data['items'][idx]['link'] + '"><h5><b>' + data['items'][idx]['title'] + "</b></h5></a><em style='color: #888888'> Published: " + parseDate(data['items'][idx]['pubDate']) + "</em>";
+	  	  	}
+			function fetchMediumData(){
+				fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmedium.com%2Ffeed%2F%40shakedzy')
+					.then((response) => response.json())
+				    .then((data) => {
+				    	console.log(data);
+				      document.getElementById("medium").innerHTML = parseSinglePost(data,0) + "<hr style='margin: 10px'>" + parseSinglePost(data,1);
+				    })
+			}
+			fetchMediumData()
+		   </script>
 	</div>
 
 	<div class="one-third-width gallery-column gallery-preview right">
