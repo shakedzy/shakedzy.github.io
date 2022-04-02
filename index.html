@@ -28,9 +28,9 @@ permalink: /
 	<div class="one-third-width gallery-column left">
 		<div class="gallery-preview" style="width: 100%">
 			<h4 class="overview-gallery-title">Learn with Me on Manning.com</h4>
-			<a href="https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser">
+			<a href="https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser?utm_source=shakedzy&utm_medium=affiliate&utm_campaign=liveproject_zychlinski_real_3_22_22&a_aid=shakedzy&a_bid=17bfd56e">
 			<img src="liveproject.jpeg" style="width: 70%; padding-top: 10px; padding-bottom: 10px; display: block; margin-left: auto; margin-right: auto;"></a>	
-			<center><h5><b><a href="https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser?utm_source=shakedzy&utm_medium=affiliate&utm_campaign=liveproject_zychlinski_real_3_22_22&a_aid=shakedzy&a_bid=17bfd56e">Join my series!</a></b></h5></center>
+			<a href="https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser?utm_source=shakedzy&utm_medium=affiliate&utm_campaign=liveproject_zychlinski_real_3_22_22&a_aid=shakedzy&a_bid=17bfd56e"><center><h5><b>Join my series!</b></h5></center></a>
 			Bridge the gap between the recommender system theory you’ve learned and the hands-on experience you need. This liveProject series provides a deep dive into real-world data management in industrial applications that’s truly rare in learning resources.
 		</div>
 		<div class="gallery-preview" style="width: 100%">
@@ -54,8 +54,7 @@ permalink: /
 
  	<div class="one-third-width gallery-column gallery-preview center">
 	  <h4 class="overview-gallery-title">Latest on Medium</h4>
-	  <div id="medium"></div>
-	  	  <div id="medium"></div>
+	  	  <div id="medium" style="padding-top: 10px; padding-bottom: 10px;"></div>
 	  	  <script type="text/javascript">
 	  	  	function parseDate(dt){
 	  	  		var date = new Date(dt);
@@ -64,8 +63,17 @@ permalink: /
 				var yyyy = date.getFullYear();
 				return mm + '/' + dd + '/' + yyyy;
 	  	  	}
+	  	  	function splitDescription(description)
+			{
+				const truncate = (str, max, suffix) => str.length < max ? str : `${str.substr(0, str.substr(0, max - suffix.length).lastIndexOf(' '))}${suffix}`;
+				var paragraphs = description.split('<p>');
+			    var p1 = paragraphs[1].split('</p>')[0];
+			    var p2 = paragraphs[2].split('</p>')[0];
+			    var p = (p1 + '. ' + p2).replace(/<[^>]*>?/gm, '');
+			    return truncate(p, 300, '...'); ;
+			}
 	  	  	function parseSinglePost(data, idx){
-	  	  		return '<a href="' + data['items'][idx]['link'] + '"><img style="padding-bottom: 5px;" src="' + data['items'][idx]['thumbnail'] + '"></a><br><a href="' + data['items'][idx]['link'] + '"><h5><b>' + data['items'][idx]['title'] + "</b></h5></a><em style='color: #888888'> Published: " + parseDate(data['items'][idx]['pubDate']) + "</em>";
+	  	  		return '<a href="' + data['items'][idx]['link'] + '"><img style="padding-bottom: 5px;" src="' + data['items'][idx]['thumbnail'] + '"></a><br><a href="' + data['items'][idx]['link'] + '"><h5><b>' + data['items'][idx]['title'] + "</b></h5></a><em style='color: #888888'> Published: " + parseDate(data['items'][idx]['pubDate']) + "</em><br>" + splitDescription(data['items'][idx]['description']);
 	  	  	}
 			function fetchMediumData(){
 				fetch('https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmedium.com%2Ffeed%2F%40shakedzy')
