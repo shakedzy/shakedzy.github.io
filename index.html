@@ -57,7 +57,7 @@ permalink: /
 
  	<div class="one-third-width gallery-column center">
  		<div class="gallery-preview">
- 			<h4 class="overview-gallery-title">Latest on <em>The Generators'</em> Podcast</h4>
+ 			<h4 class="overview-gallery-title">Latest on <em>The Generators</em> Podcast</h4>
  			<em>Hebrew only</em><br>
  			<div id="podcast" style="padding-top: 10px; padding-bottom: 10px; direction: rtl; text-align: right;"></div> 
  			<script type="text/javascript">
@@ -81,7 +81,7 @@ permalink: /
 
 				  // Extract the title and description of the episode
 				  const title = firstEpisode.getElementsByTagName("title")[0].textContent;
-				  const description = firstEpisode.getElementsByTagName("description")[0].textContent;
+				  const description = firstEpisode.getElementsByTagName("description")[0].textContent.split("---")[0].trim();
 				  const link = firstEpisode.getElementsByTagName("link")[0].textContent;
 				  const pubDate = firstEpisode.getElementsByTagName("pubDate")[0].textContent;
 
