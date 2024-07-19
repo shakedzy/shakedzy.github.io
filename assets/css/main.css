@@ -12,7 +12,7 @@
     top: 0;
     left: 0;
     width: 100%;
-    height: 0.2em; /* Adjust this value to change the stripe's thickness */
+    height: 0.3em; /* Adjust this value to change the stripe's thickness */
     background: linear-gradient(to right, rgba(201,6,6, 0.3), rgba(255,235,2, 0.4), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5),rgba(0,159,227, 0.5) ,rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5), rgba(0,159,227, 0.5));
     z-index: 9999; /* This ensures the stripe appears on top of other elements */
 }
