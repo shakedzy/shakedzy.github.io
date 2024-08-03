@@ -19,7 +19,7 @@
 									</div>
 									<ul class="actions">
 										<li><input type="submit" value="Send" class="primary g-recaptcha" 
-											data-sitekey="6Lcv3MkpAAAAAJuf4ma0fWckqPAQ3p8YexUuFmsx" 
+											data-sitekey="[ACQUIRE_FROM_GOOGLE]" 
 											data-callback='onSubmit' 
 											data-action='submit' /></li>
 									</ul>
