@@ -1,0 +1,27 @@
+                            <section>
+								<h2>Get in touch</h2>
+								<form action="https://formspree.io/f/mqkrlpka" method="POST" id="send-email">
+									<script>
+										function onSubmit(token) {
+										  document.getElementById("send-email").submit();
+										}
+									</script>
+									<div class="fields">
+										<div class="field half">
+											<input type="text" name="name" id="name" placeholder="Name" />
+										</div>
+										<div class="field half">
+											<input type="email" name="email" id="email" placeholder="Email" />
+										</div>
+										<div class="field">
+											<textarea name="message" id="message" placeholder="Message"></textarea>
+										</div>
+									</div>
+									<ul class="actions">
+										<li><input type="submit" value="Send" class="primary g-recaptcha" 
+											data-sitekey="6Lcv3MkpAAAAAJuf4ma0fWckqPAQ3p8YexUuFmsx" 
+											data-callback='onSubmit' 
+											data-action='submit' /></li>
+									</ul>
+								</form>
+							</section>
