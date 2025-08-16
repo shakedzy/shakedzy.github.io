@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Publications - Shaked Zychlinski</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header class="page-header">
+            <nav>
+                <a href="index.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Home
+                </a>
+            </nav>
+            <h1>Publications</h1>
+            <p class="page-subtitle">Academic papers and research publications</p>
+            <div class="scholar-link">
+                <a href="https://scholar.google.com/citations?hl=en&user=3lS0dSIAAAAJ" target="_blank" rel="noopener noreferrer" class="scholar-button">
+                    <i class="fas fa-graduation-cap"></i>
+                    View on Google Scholar
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <div class="publications-grid" id="publications">
+                <div class="loading">Loading publications...</div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        class PublicationsPage {
+            constructor() {
+                this.loadAllPublications();
+            }
+
+            async loadContent() {
+                try {
+                    const response = await fetch('content.json');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return await response.json();
+                } catch (error) {
+                    console.error('Error loading content.json:', error);
+                    return null;
+                }
+            }
+
+            async loadAllPublications() {
+                const content = await this.loadContent();
+                const publications = content?.publications || [];
+
+                const container = document.getElementById('publications');
+                
+                if (publications.length === 0) {
+                    container.innerHTML = '<div class="empty-state">No publications found.</div>';
+                    return;
+                }
+
+                container.innerHTML = publications.map(pub => `
+                    <div class="publication-card">
+                        <div class="publication-year">${pub.year}</div>
+                        <div class="publication-content">
+                            <h2 class="publication-title">
+                                <a href="${pub.link}" target="_blank" rel="noopener noreferrer">${pub.title}</a>
+                            </h2>
+                            <div class="publication-journal">${pub.journal}</div>
+                            <div class="publication-description">${pub.description}</div>
+                            <div class="publication-actions">
+                                <a href="${pub.link}" class="publication-link" target="_blank" rel="noopener noreferrer">
+                                    Read Paper →
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initialize the page
+        new PublicationsPage();
+        
+        // Initialize theme manager for this page
+        if (!window.themeManager) {
+            const themeManager = {
+                currentTheme: localStorage.getItem('theme') || 'system',
+                getSystemTheme() {
+                    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                },
+                applyTheme() {
+                    const html = document.documentElement;
+                    if (this.currentTheme === 'system') {
+                        html.removeAttribute('data-theme');
+                    } else {
+                        html.setAttribute('data-theme', this.currentTheme);
+                    }
+                },
+                updateToggleButton() {
+                    const icon = document.getElementById('theme-icon');
+                    const text = document.getElementById('theme-text');
+                    if (!icon || !text) return;
+
+                    const effectiveTheme = this.currentTheme === 'system' ? this.getSystemTheme() : this.currentTheme;
+                    if (effectiveTheme === 'dark') {
+                        icon.className = 'fas fa-moon theme-toggle-icon';
+                        text.textContent = 'Dark';
+                    } else {
+                        icon.className = 'fas fa-sun theme-toggle-icon';
+                        text.textContent = 'Light';
+                    }
+                    if (this.currentTheme === 'system') {
+                        text.textContent = 'Auto';
+                    }
+                },
+                toggleTheme() {
+                    switch (this.currentTheme) {
+                        case 'light': this.currentTheme = 'dark'; break;
+                        case 'dark': this.currentTheme = 'system'; break;
+                        case 'system': this.currentTheme = 'light'; break;
+                        default: this.currentTheme = 'light';
+                    }
+                    localStorage.setItem('theme', this.currentTheme);
+                    this.applyTheme();
+                    this.updateToggleButton();
+                },
+                init() {
+                    this.applyTheme();
+                    this.updateToggleButton();
+                    const toggle = document.getElementById('theme-toggle');
+                    if (toggle) {
+                        toggle.addEventListener('click', () => this.toggleTheme());
+                    }
+                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                        if (this.currentTheme === 'system') {
+                            this.updateToggleButton();
+                        }
+                    });
+                }
+            };
+            themeManager.init();
+            window.themeManager = themeManager;
+        }
+    </script>
+    
+    <!-- Dark Mode Toggle -->
+    <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun theme-toggle-icon" id="theme-icon"></i>
+        <span class="theme-toggle-text" id="theme-text">Light</span>
+    </div>
+</body>
+</html>

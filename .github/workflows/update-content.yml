@@ -1,0 +1,72 @@
+name: Update Content from External Sources
+
+on:
+  schedule:
+    # Run daily at Midnight UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual triggering
+    inputs:
+      force_update:
+        description: 'Force update all content'
+        required: false
+        default: 'false'
+
+env:
+  GH_TOKEN: ${{ secrets.GH_TOKEN }}
+  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+
+jobs:
+  update-content:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+        
+    - name: Fetch latest content
+      run: |
+        cd scripts
+        python content-fetcher.py ..
+        
+    - name: Check for changes
+      id: changes
+      run: |
+        if [ -n "$(git status --porcelain)" ]; then
+          echo "changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected in content files"
+        else
+          echo "changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected"
+        fi
+        
+    - name: Commit and push changes
+      if: steps.changes.outputs.changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "Content Update Bot"
+        git add data/talks.json
+        git commit -m "🤖 Auto-update content from external sources"
+        git push
+        
+    - name: Create summary
+      if: always()
+      run: |
+        echo "## Content Update Summary" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.changes.outputs.changes }}" == "true" ]; then
+          echo "✅ Content updated successfully" >> $GITHUB_STEP_SUMMARY
+          echo "- Fetched latest articles from Medium, JFrog, Taboola" >> $GITHUB_STEP_SUMMARY
+          echo "- Updated talks.json with chronological ordering" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "ℹ️ No new content found" >> $GITHUB_STEP_SUMMARY
+        fi
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "**Last run:** $(date)" >> $GITHUB_STEP_SUMMARY
