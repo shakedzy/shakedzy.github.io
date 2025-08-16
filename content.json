@@ -46,11 +46,7 @@
     "selected": [
       "dython",
       "companion", 
-      "notebooks",
-      "tic_tac_toe",
-      "techbyai",
-      "nanogpt",
-      "eevee-chat"
+      "techbyai"
     ],
     "custom_descriptions": {
       "dython": "A comprehensive set of data analysis and machine learning tools in Python",
