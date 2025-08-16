@@ -12,18 +12,11 @@
 
   "publications": [
     {
-      "title": "Deep Learning Approaches for Real-Time Data Processing",
-      "journal": "Journal of Machine Learning Research",
+      "title": "Visual Representation for Capturing Creator Theme in Brand-Creator Marketplace",
+      "journal": "RecSys '23: Proceedings of the 17th ACM Conference on Recommender Systems",
       "year": "2023",
-      "link": "https://example.com/paper1",
-      "description": "Novel architecture for processing streaming data with deep neural networks"
-    },
-    {
-      "title": "Scalable AI Systems in Production Environments", 
-      "journal": "AI & Society",
-      "year": "2022",
-      "link": "https://example.com/paper2",
-      "description": "Best practices and lessons learned from deploying ML models at scale"
+      "link": "https://dl.acm.org/doi/10.1145/3604915.3610237",
+      "description": "Presenting two novel AI methods, SAME and OAAR, enabling searches based on abstract aesthetic qualities rather than just on-screen objects."
     }
   ],
 
