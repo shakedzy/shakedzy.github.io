@@ -1,13 +1,21 @@
 // Theme management
 class ThemeManager {
     constructor() {
-        this.currentTheme = this.getStoredTheme() || 'system';
+        this.currentTheme = this.getStoredTheme();
+        
+        // If no stored theme, use system preference and store it
+        if (!this.currentTheme) {
+            this.currentTheme = this.getSystemTheme();
+            this.storeTheme(this.currentTheme); // Store the initial preference
+        }
+        
         this.init();
     }
 
     init() {
         this.applyTheme();
-        this.updateToggleButton();
+        // Delay button update to ensure DOM is ready
+        setTimeout(() => this.updateToggleButton(), 0);
         this.bindEvents();
         this.updateAvatarImage();
     }
@@ -26,13 +34,7 @@ class ThemeManager {
 
     applyTheme() {
         const html = document.documentElement;
-        
-        if (this.currentTheme === 'system') {
-            html.removeAttribute('data-theme');
-        } else {
-            html.setAttribute('data-theme', this.currentTheme);
-        }
-
+        html.setAttribute('data-theme', this.currentTheme);
         this.updateAvatarImage();
     }
 
@@ -40,8 +42,7 @@ class ThemeManager {
         const avatar = document.querySelector('.avatar');
         if (!avatar) return;
 
-        const effectiveTheme = this.currentTheme === 'system' ? this.getSystemTheme() : this.currentTheme;
-        const imageSrc = effectiveTheme === 'dark' ? 'almond_dark.png' : 'almond.png';
+        const imageSrc = this.currentTheme === 'dark' ? 'almond_dark.png' : 'almond.png';
         
         if (avatar.src !== window.location.origin + '/' + imageSrc) {
             avatar.src = imageSrc;
@@ -53,39 +54,23 @@ class ThemeManager {
         const icon = document.getElementById('theme-icon');
         const text = document.getElementById('theme-text');
         
-        if (!toggle || !icon || !text) return;
-
-        const effectiveTheme = this.currentTheme === 'system' ? this.getSystemTheme() : this.currentTheme;
+        if (!toggle || !icon || !text) {
+            setTimeout(() => this.updateToggleButton(), 100);
+            return;
+        }
         
-        if (effectiveTheme === 'dark') {
+        if (this.currentTheme === 'dark') {
             icon.className = 'fas fa-moon theme-toggle-icon';
             text.textContent = 'Dark';
         } else {
             icon.className = 'fas fa-sun theme-toggle-icon';
             text.textContent = 'Light';
         }
-
-        if (this.currentTheme === 'system') {
-            text.textContent = 'Auto';
-        }
     }
 
     toggleTheme() {
-        // Cycle through: light -> dark -> system -> light
-        switch (this.currentTheme) {
-            case 'light':
-                this.currentTheme = 'dark';
-                break;
-            case 'dark':
-                this.currentTheme = 'system';
-                break;
-            case 'system':
-                this.currentTheme = 'light';
-                break;
-            default:
-                this.currentTheme = 'light';
-        }
-
+        // Toggle between light and dark only
+        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
         this.storeTheme(this.currentTheme);
         this.applyTheme();
         this.updateToggleButton();
@@ -96,23 +81,19 @@ class ThemeManager {
         if (toggle) {
             toggle.addEventListener('click', () => this.toggleTheme());
         }
-
-        // Listen for system theme changes
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-            if (this.currentTheme === 'system') {
-                this.updateToggleButton();
-                this.updateAvatarImage();
-            }
-        });
     }
 }
 
 // Personal website with data-driven content
 class PersonalWebsite {
     constructor() {
+        // Configuration constants
+        this.MAX_PUBLICATIONS_PREVIEW = 4; // Show first 4 publications by default
+        this.MAX_TALKS_DISPLAY = 6; // Show first 10 talks/videos
+        
         this.baseUrl = window.location.origin + window.location.pathname.replace('index.html', '');
         this.githubApiUrl = 'https://api.github.com/repos/';
-        this.publicationsVisible = 4; // Show first 4 publications by default
+        this.publicationsVisible = this.MAX_PUBLICATIONS_PREVIEW;
         this.content = null;
         this.themeManager = new ThemeManager();
         
@@ -132,6 +113,8 @@ class PersonalWebsite {
                 this.loadPublications(),
                 this.loadOpenSource(),
                 this.loadCourse(),
+                this.loadCSSP(),
+                this.loadAwareness(),
                 this.loadTalks()
             ]);
             console.log('Personal website loaded successfully');
@@ -182,17 +165,19 @@ class PersonalWebsite {
                     <a href="${pub.link}" class="publication-link" target="_blank" rel="noopener noreferrer">${pub.title}</a>
                 </div>
                 <div class="publication-journal">${pub.journal}, ${pub.year}</div>
-                <div class="publication-description">${pub.description}</div>
+                <div class="publication-description">${this.formatAuthors(pub.authors, pub.my_author_position)}</div>
             </div>
         `).join('');
 
-        // Always show "View all" button for publications
-        if (publications.length > 0) {
+        // Show "View all" button only if there are more publications than we display
+        if (publications.length > this.MAX_PUBLICATIONS_PREVIEW) {
             showMoreBtn.style.display = 'block';
             showMoreBtn.innerHTML = 'View All Publications →';
             showMoreBtn.onclick = () => {
                 window.location.href = 'publications.html';
             };
+        } else {
+            showMoreBtn.style.display = 'none';
         }
     }
 
@@ -295,6 +280,67 @@ class PersonalWebsite {
         `;
     }
 
+    async loadCSSP() {
+        const csspProjects = this.content?.cssp;
+        if (!csspProjects || !Array.isArray(csspProjects)) return;
+
+        const container = document.getElementById('cssp-carousel');
+        
+        container.innerHTML = csspProjects.map(project => `
+            <a href="${project.link}" class="cssp-card" target="_blank" rel="noopener noreferrer">
+                <div class="cssp-icon">
+                    <img src="${project.icon}" alt="${project.name} icon" class="cssp-favicon" onerror="this.style.display='none'">
+                </div>
+                <div class="cssp-content">
+                    <div class="cssp-title">${project.name}</div>
+                    <div class="cssp-description">${project.description}</div>
+                </div>
+            </a>
+        `).join('');
+    }
+
+    async loadAwareness() {
+        const awareness = this.content?.awareness;
+        const section = document.querySelector('.awareness-raising');
+        
+        // Check if awareness object exists and has meaningful content
+        const hasTitle = awareness?.title && awareness.title.trim();
+        const hasContent = awareness?.content && awareness.content.trim();
+        const hasLinks = awareness?.links && Array.isArray(awareness.links) && awareness.links.length > 0;
+        
+        // Hide section if no meaningful content
+        if (!awareness || (!hasTitle && !hasContent && !hasLinks)) {
+            if (section) {
+                section.style.display = 'none';
+            }
+            return;
+        }
+        
+        // Show section if it has content
+        if (section) {
+            section.style.display = 'block';
+        }
+
+        const container = document.getElementById('awareness-content');
+        
+        // Use the first link as the main link for the entire section
+        const primaryLink = hasLinks ? awareness.links[0] : null;
+        
+        if (primaryLink) {
+            container.innerHTML = `
+                <a href="${primaryLink.url}" class="awareness-clickable" target="_blank" rel="noopener noreferrer">
+                    <h2>${awareness.title || 'Awareness'}</h2>
+                    <p>${awareness.content || ''}</p>
+                </a>
+            `;
+        } else {
+            container.innerHTML = `
+                <h2>${awareness.title || 'Awareness'}</h2>
+                <p>${awareness.content || ''}</p>
+            `;
+        }
+    }
+
     async loadTalks() {
         const talksData = await this.loadJSON('talks.json'); // Auto-fetched content
         const manualTalks = this.content?.manual_talks || [];
@@ -310,8 +356,8 @@ class PersonalWebsite {
         // Sort chronologically (newest first)
         allTalks.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Show only first 6 items
-        const displayTalks = allTalks.slice(0, 6);
+        // Show only first N items
+        const displayTalks = allTalks.slice(0, this.MAX_TALKS_DISPLAY);
         
         const container = document.getElementById('talks-carousel');
         // Debug: Log the talks being rendered
@@ -351,6 +397,19 @@ class PersonalWebsite {
             month: 'short', 
             day: 'numeric' 
         });
+    }
+
+    formatAuthors(authors, myPosition) {
+        if (!authors || !Array.isArray(authors)) return '';
+        
+        const authorList = authors.map((author, index) => {
+            const position = index + 1; // Convert to 1-based index
+            if (myPosition && position === myPosition) {
+                return `<strong>${author}</strong>`;
+            }
+            return author;
+        }).join(', ');
+        return `<em>${authorList}</em>`;
     }
 }
 

@@ -71,7 +71,7 @@
                                 <a href="${pub.link}" target="_blank" rel="noopener noreferrer">${pub.title}</a>
                             </h2>
                             <div class="publication-journal">${pub.journal}</div>
-                            <div class="publication-description">${pub.description}</div>
+                            <div class="publication-description">${this.formatAuthors(pub.authors, pub.my_author_position)}</div>
                             <div class="publication-actions">
                                 <a href="${pub.link}" class="publication-link" target="_blank" rel="noopener noreferrer">
                                     Read Paper →
@@ -81,6 +81,18 @@
                     </div>
                 `).join('');
             }
+
+            formatAuthors(authors, myPosition) {
+                if (!authors || !Array.isArray(authors)) return '';
+                
+                return authors.map((author, index) => {
+                    const position = index + 1; // Convert to 1-based index
+                    if (myPosition && position === myPosition) {
+                        return `<strong>${author}</strong>`;
+                    }
+                    return author;
+                }).join(', ');
+            }
         }
 
         // Initialize the page
@@ -89,42 +101,33 @@
         // Initialize theme manager for this page
         if (!window.themeManager) {
             const themeManager = {
-                currentTheme: localStorage.getItem('theme') || 'system',
-                getSystemTheme() {
-                    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                },
+                currentTheme: (() => {
+                    let theme = localStorage.getItem('theme');
+                    if (!theme) {
+                        theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                        localStorage.setItem('theme', theme);
+                    }
+                    return theme;
+                })(),
                 applyTheme() {
                     const html = document.documentElement;
-                    if (this.currentTheme === 'system') {
-                        html.removeAttribute('data-theme');
-                    } else {
-                        html.setAttribute('data-theme', this.currentTheme);
-                    }
+                    html.setAttribute('data-theme', this.currentTheme);
                 },
                 updateToggleButton() {
                     const icon = document.getElementById('theme-icon');
                     const text = document.getElementById('theme-text');
                     if (!icon || !text) return;
 
-                    const effectiveTheme = this.currentTheme === 'system' ? this.getSystemTheme() : this.currentTheme;
-                    if (effectiveTheme === 'dark') {
+                    if (this.currentTheme === 'dark') {
                         icon.className = 'fas fa-moon theme-toggle-icon';
                         text.textContent = 'Dark';
                     } else {
                         icon.className = 'fas fa-sun theme-toggle-icon';
                         text.textContent = 'Light';
                     }
-                    if (this.currentTheme === 'system') {
-                        text.textContent = 'Auto';
-                    }
                 },
                 toggleTheme() {
-                    switch (this.currentTheme) {
-                        case 'light': this.currentTheme = 'dark'; break;
-                        case 'dark': this.currentTheme = 'system'; break;
-                        case 'system': this.currentTheme = 'light'; break;
-                        default: this.currentTheme = 'light';
-                    }
+                    this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
                     localStorage.setItem('theme', this.currentTheme);
                     this.applyTheme();
                     this.updateToggleButton();
@@ -136,11 +139,6 @@
                     if (toggle) {
                         toggle.addEventListener('click', () => this.toggleTheme());
                     }
-                    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                        if (this.currentTheme === 'system') {
-                            this.updateToggleButton();
-                        }
-                    });
                 }
             };
             themeManager.init();

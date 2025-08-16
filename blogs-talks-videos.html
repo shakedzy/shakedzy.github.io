@@ -28,7 +28,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #0066cc;
+            color: var(--accent);
             text-decoration: none;
             margin-bottom: 30px;
             font-weight: 500;
@@ -42,11 +42,11 @@
             font-size: 32px;
             font-weight: 600;
             margin-bottom: 10px;
-            color: #222;
+            color: var(--text-color);
         }
         
         .page-subtitle {
-            color: #666;
+            color: var(--text-muted);
             margin-bottom: 40px;
             font-size: 18px;
         }
@@ -69,14 +69,14 @@
         }
         
         .talk-item:hover {
-            border-color: #ccc;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-color: var(--border-hover);
+            box-shadow: 0 2px 8px var(--shadow);
             text-decoration: none;
         }
         
         .talk-icon-large {
             font-size: 24px;
-            color: #666;
+            color: var(--text-muted);
             width: 40px;
             text-align: center;
             flex-shrink: 0;
@@ -90,7 +90,7 @@
             font-size: 18px;
             font-weight: 500;
             margin-bottom: 6px;
-            color: #333;
+            color: var(--text-color);
             line-height: 1.3;
         }
         
@@ -100,7 +100,7 @@
             gap: 20px;
             margin-bottom: 8px;
             font-size: 14px;
-            color: #666;
+            color: var(--text-muted);
         }
         
         .talk-platform-large {
@@ -108,7 +108,7 @@
         }
         
         .talk-description-full {
-            color: #555;
+            color: var(--text-secondary);
             line-height: 1.5;
             font-size: 14px;
         }
@@ -116,17 +116,18 @@
         .loading-state {
             text-align: center;
             padding: 40px;
-            color: #666;
+            color: var(--text-muted);
         }
         
         .stats-bar {
-            background: #f8f9fa;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
             padding: 16px;
             border-radius: 8px;
             margin-bottom: 30px;
             text-align: center;
             font-size: 14px;
-            color: #666;
+            color: var(--text-muted);
         }
         
         @media (max-width: 600px) {
@@ -268,42 +269,33 @@
             if (!window.themeManager) {
                 // Define a minimal theme manager for standalone pages
                 const themeManager = {
-                    currentTheme: localStorage.getItem('theme') || 'system',
-                    getSystemTheme() {
-                        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                    },
+                    currentTheme: (() => {
+                        let theme = localStorage.getItem('theme');
+                        if (!theme) {
+                            theme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                            localStorage.setItem('theme', theme);
+                        }
+                        return theme;
+                    })(),
                     applyTheme() {
                         const html = document.documentElement;
-                        if (this.currentTheme === 'system') {
-                            html.removeAttribute('data-theme');
-                        } else {
-                            html.setAttribute('data-theme', this.currentTheme);
-                        }
+                        html.setAttribute('data-theme', this.currentTheme);
                     },
                     updateToggleButton() {
                         const icon = document.getElementById('theme-icon');
                         const text = document.getElementById('theme-text');
                         if (!icon || !text) return;
 
-                        const effectiveTheme = this.currentTheme === 'system' ? this.getSystemTheme() : this.currentTheme;
-                        if (effectiveTheme === 'dark') {
+                        if (this.currentTheme === 'dark') {
                             icon.className = 'fas fa-moon theme-toggle-icon';
                             text.textContent = 'Dark';
                         } else {
                             icon.className = 'fas fa-sun theme-toggle-icon';
                             text.textContent = 'Light';
                         }
-                        if (this.currentTheme === 'system') {
-                            text.textContent = 'Auto';
-                        }
                     },
                     toggleTheme() {
-                        switch (this.currentTheme) {
-                            case 'light': this.currentTheme = 'dark'; break;
-                            case 'dark': this.currentTheme = 'system'; break;
-                            case 'system': this.currentTheme = 'light'; break;
-                            default: this.currentTheme = 'light';
-                        }
+                        this.currentTheme = this.currentTheme === 'light' ? 'dark' : 'light';
                         localStorage.setItem('theme', this.currentTheme);
                         this.applyTheme();
                         this.updateToggleButton();
@@ -315,11 +307,6 @@
                         if (toggle) {
                             toggle.addEventListener('click', () => this.toggleTheme());
                         }
-                        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                            if (this.currentTheme === 'system') {
-                                this.updateToggleButton();
-                            }
-                        });
                     }
                 };
                 themeManager.init();
