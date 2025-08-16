@@ -7,8 +7,8 @@
     --text-subtle: #555;
     --text-light: #888;
     --text-meta: #999;
-    --border-color: #eee;
-    --border-hover: #ccc;
+    --border-color: #ccc;
+    --border-hover: #aaa;
     --border-subtle: #ddd;
     --accent-color: #0066cc;
     --accent-hover: #0052a3;
@@ -103,7 +103,7 @@ body {
 
 /* ===== LAYOUT ===== */
 .container {
-    max-width: 650px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 60px 20px;
 }
@@ -183,6 +183,85 @@ p {
 }
 
 .contact-link:hover {
+    text-decoration: underline;
+}
+
+/* ===== AWARENESS RAISING ===== */
+.awareness-raising {
+    margin-bottom: 3rem;
+}
+
+.awareness-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    padding: 24px;
+    background: var(--card-bg);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.awareness-content:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 4px 12px var(--shadow);
+}
+
+.awareness-content:has(.awareness-clickable):hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.awareness-content:has(.awareness-clickable) {
+    cursor: pointer;
+    transition: transform 0.2s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.awareness-content h2 {
+    margin: 0 0 16px 0;
+    color: var(--text-color);
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.awareness-content p {
+    margin: 0 0 12px 0;
+    line-height: 1.6;
+}
+
+.awareness-content p:last-child {
+    margin-bottom: 0;
+}
+
+.awareness-clickable {
+    display: block;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.awareness-clickable:hover {
+    color: inherit;
+    text-decoration: none;
+}
+
+.awareness-clickable h2,
+.awareness-clickable p {
+    pointer-events: none;
+}
+
+.awareness-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.awareness-link:hover {
+    color: var(--accent-hover);
     text-decoration: underline;
 }
 
@@ -454,6 +533,66 @@ p {
 .course-link:hover {
     text-decoration: underline;
     color: var(--accent-hover);
+}
+
+/* ===== CSSP (Cute Simple Side Projects) ===== */
+.cssp-card {
+    flex: 0 0 200px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--card-bg);
+    text-decoration: none;
+    color: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+}
+
+.cssp-card:hover {
+    border-color: var(--border-hover);
+    box-shadow: 0 2px 8px var(--shadow);
+    text-decoration: none;
+    color: inherit;
+    transform: translateY(-2px);
+}
+
+.cssp-icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+}
+
+.cssp-favicon {
+    width: 32px;
+    height: 32px;
+    border-radius: 4px;
+    object-fit: contain;
+}
+
+.cssp-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cssp-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-color);
+    line-height: 1.3;
+}
+
+.cssp-description {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.3;
 }
 
 /* ===== TALKS & VIDEOS ===== */
@@ -788,6 +927,22 @@ p {
     .talk-card {
         flex: 0 0 240px;
         padding: 16px;
+    }
+
+    .cssp-card {
+        flex: 0 0 180px;
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .awareness-content {
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .awareness-content h2 {
+        font-size: 20px;
+        margin-bottom: 12px;
     }
 
     .see-more-card {
