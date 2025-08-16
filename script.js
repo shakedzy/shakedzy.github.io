@@ -310,8 +310,8 @@ class PersonalWebsite {
         // Sort chronologically (newest first)
         allTalks.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-        // Show only first 10 items
-        const displayTalks = allTalks.slice(0, 10);
+        // Show only first 6 items
+        const displayTalks = allTalks.slice(0, 6);
         
         const container = document.getElementById('talks-carousel');
         // Debug: Log the talks being rendered
