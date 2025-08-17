@@ -2,7 +2,7 @@
   "manual_items": [],
   "auto_fetched": [
     {
-      "id": "medium_5812",
+      "id": "medium_3605",
       "title": "Tiny but Mighty: Extracting Complete Article from Screen-Recording Using Local Models",
       "platform": "Medium",
       "type": "Article",
@@ -15,7 +15,7 @@
       "language": "en"
     },
     {
-      "id": "medium_2710",
+      "id": "medium_4976",
       "title": "Introducing the First-Ever AI Magazine & Podcast Made By AI",
       "platform": "Medium",
       "type": "Article",
@@ -28,7 +28,7 @@
       "language": "en"
     },
     {
-      "id": "medium_1676",
+      "id": "medium_7800",
       "title": "7 Lessons Learned on Creating a Complete Product Using ChatGPT",
       "platform": "Medium",
       "type": "Article",
@@ -41,7 +41,7 @@
       "language": "en"
     },
     {
-      "id": "medium_5717",
+      "id": "medium_5192",
       "title": "How I Coded My Own Private French Tutor Out of ChatGPT",
       "platform": "Medium",
       "type": "Article",
@@ -54,7 +54,7 @@
       "language": "en"
     },
     {
-      "id": "medium_9240",
+      "id": "medium_6576",
       "title": "Six Lessons Learned From Hyper-Growing a Data-Science Group",
       "platform": "Medium",
       "type": "Article",
@@ -67,7 +67,7 @@
       "language": "en"
     },
     {
-      "id": "medium_5607",
+      "id": "medium_7694",
       "title": "6 Papers Every Modern Data Scientist Must Read",
       "platform": "Medium",
       "type": "Article",
@@ -80,7 +80,7 @@
       "language": "en"
     },
     {
-      "id": "medium_8909",
+      "id": "medium_296",
       "title": "The Metric System: How to Correctly Measure Your Model",
       "platform": "Medium",
       "type": "Article",
@@ -93,7 +93,7 @@
       "language": "en"
     },
     {
-      "id": "medium_6519",
+      "id": "medium_8322",
       "title": "Why COVID-19 Vaccines Are a Requiem for Humanity",
       "platform": "Medium",
       "type": "Article",
@@ -106,7 +106,7 @@
       "language": "en"
     },
     {
-      "id": "medium_7835",
+      "id": "medium_2901",
       "title": "How I Keep Up with the Latest Innovations in AI and ML",
       "platform": "Medium",
       "type": "Article",
@@ -119,7 +119,7 @@
       "language": "en"
     },
     {
-      "id": "medium_8612",
+      "id": "medium_1899",
       "title": "Yes, You Can: How to Kickstart Your Career as a Data Scientist",
       "platform": "Medium",
       "type": "Article",
@@ -139,7 +139,7 @@
       "link": "https://www.youtube.com/watch?v=Ci53gWMwsi8",
       "icon": "fab fa-youtube",
       "date": "2024-03-25",
-      "views": "273",
+      "views": "275",
       "source": "youtube",
       "description": "As Large Language Models (LLMs) such as GPT and Llama become increasingly integrated into various sectors, including tec...",
       "playlist": "Talks [English]",
