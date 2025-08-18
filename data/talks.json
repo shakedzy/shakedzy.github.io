@@ -2,7 +2,7 @@
   "manual_items": [],
   "auto_fetched": [
     {
-      "id": "medium_3605",
+      "id": "medium_1458",
       "title": "Tiny but Mighty: Extracting Complete Article from Screen-Recording Using Local Models",
       "platform": "Medium",
       "type": "Article",
@@ -15,7 +15,7 @@
       "language": "en"
     },
     {
-      "id": "medium_4976",
+      "id": "medium_9615",
       "title": "Introducing the First-Ever AI Magazine & Podcast Made By AI",
       "platform": "Medium",
       "type": "Article",
@@ -28,7 +28,7 @@
       "language": "en"
     },
     {
-      "id": "medium_7800",
+      "id": "medium_7359",
       "title": "7 Lessons Learned on Creating a Complete Product Using ChatGPT",
       "platform": "Medium",
       "type": "Article",
@@ -41,7 +41,7 @@
       "language": "en"
     },
     {
-      "id": "medium_5192",
+      "id": "medium_3320",
       "title": "How I Coded My Own Private French Tutor Out of ChatGPT",
       "platform": "Medium",
       "type": "Article",
@@ -54,7 +54,7 @@
       "language": "en"
     },
     {
-      "id": "medium_6576",
+      "id": "medium_5946",
       "title": "Six Lessons Learned From Hyper-Growing a Data-Science Group",
       "platform": "Medium",
       "type": "Article",
@@ -67,7 +67,7 @@
       "language": "en"
     },
     {
-      "id": "medium_7694",
+      "id": "medium_9619",
       "title": "6 Papers Every Modern Data Scientist Must Read",
       "platform": "Medium",
       "type": "Article",
@@ -80,7 +80,7 @@
       "language": "en"
     },
     {
-      "id": "medium_296",
+      "id": "medium_4251",
       "title": "The Metric System: How to Correctly Measure Your Model",
       "platform": "Medium",
       "type": "Article",
@@ -93,7 +93,7 @@
       "language": "en"
     },
     {
-      "id": "medium_8322",
+      "id": "medium_4470",
       "title": "Why COVID-19 Vaccines Are a Requiem for Humanity",
       "platform": "Medium",
       "type": "Article",
@@ -106,7 +106,7 @@
       "language": "en"
     },
     {
-      "id": "medium_2901",
+      "id": "medium_158",
       "title": "How I Keep Up with the Latest Innovations in AI and ML",
       "platform": "Medium",
       "type": "Article",
@@ -119,7 +119,7 @@
       "language": "en"
     },
     {
-      "id": "medium_1899",
+      "id": "medium_5958",
       "title": "Yes, You Can: How to Kickstart Your Career as a Data Scientist",
       "platform": "Medium",
       "type": "Article",
@@ -153,7 +153,7 @@
       "link": "https://www.youtube.com/watch?v=95K83plZmLE",
       "icon": "fab fa-youtube",
       "date": "2024-03-09",
-      "views": "836",
+      "views": "837",
       "source": "youtube",
       "description": "In this video I interview a panel of experts from Wix, JFrog and SDR-GPT.\nWe discuss what it takes to successfuly develo...",
       "playlist": "Talks [English]",
@@ -167,7 +167,7 @@
       "link": "https://www.youtube.com/watch?v=16vb-aFA-K8",
       "icon": "fab fa-youtube",
       "date": "2024-03-09",
-      "views": "295",
+      "views": "296",
       "source": "youtube",
       "description": "Lightricks is an award winning Photo & Video editing solutions that enables users to craft and share unique visual conte...",
       "playlist": "Talks [English]",
