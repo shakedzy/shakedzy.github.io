@@ -892,6 +892,14 @@ p {
     }
 }
 
+/* ===== PODCAST NAME ===== */
+.podcast-name {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 4px;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 600px) {
     .container {
