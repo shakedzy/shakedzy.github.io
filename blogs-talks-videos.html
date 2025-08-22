@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="All talks, articles, and videos by Shaked">
-    <title>All Talks & Articles - Shaked</title>
+    <title>All Talks & Articles - shakedzy.xyz</title>
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -111,6 +111,11 @@
             color: var(--text-secondary);
             line-height: 1.5;
             font-size: 14px;
+        }
+        
+        /* Override language tag margin-left for talks page */
+        .talk-meta-large .language-tag {
+            margin-left: 0 !important;
         }
         
         .loading-state {
@@ -231,11 +236,13 @@
                         <div class="talk-content-full">
                             <div class="talk-title-large">${talk.title}</div>
                             <div class="talk-meta-large">
+                                ${talk.language ? `<span class="language-tag lang-${talk.language}">${talk.language}</span>` : ''}
                                 <span class="talk-platform-large">${talk.platform}</span>
                                 <span>${talk.type}</span>
                                 <span>${this.formatDate(talk.date)}</span>
-                                <span>${talk.views} views</span>
+                                                                  ${talk.claps && this.isSignificantClaps(talk.claps) ? `<span>${talk.claps} claps</span>` : (talk.views && talk.views !== 'N/A' && talk.type !== 'Podcast' ? `<span>${talk.views} views</span>` : '')}
                             </div>
+                            ${talk.show_name ? `<div class="podcast-name">${talk.show_name}</div>` : ''}
                             ${talk.description ? `<div class="talk-description-full">${talk.description}</div>` : ''}
                         </div>
                     </a>
@@ -259,6 +266,33 @@
                     month: 'long', 
                     day: 'numeric' 
                 });
+            }
+            
+            isSignificantClaps(claps) {
+                if (!claps) return false;
+                
+                // Handle string values like "1.1K", "500", etc.
+                if (typeof claps === 'string') {
+                    // Remove any non-numeric characters except decimal points and K/M
+                    const cleanClaps = claps.replace(/[^\d.KM]/g, '');
+                    
+                    if (cleanClaps.includes('K')) {
+                        // Convert K to thousands (e.g., "1.1K" -> 1100)
+                        const num = parseFloat(cleanClaps.replace('K', '')) * 1000;
+                        return num >= 10;
+                    } else if (cleanClaps.includes('M')) {
+                        // Convert M to millions (e.g., "1.5M" -> 1500000)
+                        const num = parseFloat(cleanClaps.replace('M', '')) * 1000000;
+                        return num >= 10;
+                    } else {
+                        // Regular number
+                        const num = parseFloat(cleanClaps);
+                        return !isNaN(num) && num >= 10;
+                    }
+                }
+                
+                // Handle numeric values
+                return typeof claps === 'number' && claps >= 10;
             }
         }
         

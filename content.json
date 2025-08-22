@@ -33,7 +33,7 @@
   ],
 
   "online_course": {
-    "title": "Machine Learning in Production",
+    "title": "Real-World Deep Learning Recommender System",
     "platform": "Manning",
     "description": "Bridge the gap between the recommender system theory you’ve learned and the hands-on experience you need. This liveProject series provides a deep dive into real-world data management in industrial applications that’s truly rare in learning resources. Developing real-world recommendation systems is much more than understanding...",
     "link": "https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser?utm_source=shakedzy&utm_medium=affiliate&utm_campaign=liveproject_zychlinski_real_3_22_22&a_aid=shakedzy&a_bid=17bfd56e",
@@ -62,19 +62,7 @@
   },
 
   "manual_talks": [],
-  "manual_podcast_guests": [
-    {
-      "title": "The Future of AI in Production",
-      "platform": "Tech Talk Podcast",
-      "type": "Podcast Guest",
-      "date": "2024-02-10",
-      "link": "https://spotify.com/episode/example",
-      "description": "Discussing the challenges and opportunities in deploying AI systems at scale",
-      "views": "5.2K",
-      "icon": "fas fa-podcast",
-      "language": "en"
-    }
-  ],
+  "manual_podcast_guests": [],
 
   "content_sources": {
     "medium": {
@@ -94,15 +82,9 @@
       "podcasts": [
         {
           "name": "המחוללים (The Generators)",
-          "url": "https://open.spotify.com/show/6tdxOe9J5qjykTLRvB6blL",
+          "url": "https://creators.spotify.com/pod/profile/the-generators/",
           "language": "he",
           "description": "Hebrew AI podcast by Shaked Zychlinski and Doron Shadeh"
-        },
-        {
-          "name": "Second Podcast",
-          "url": "https://open.spotify.com/show/5QXMiq3CvLAWq8fP0wNQRo",
-          "language": "en",
-          "description": "Second podcast (URL needs verification)"
         }
       ]
     },
@@ -111,13 +93,9 @@
         "name": "JFrog Blog",
         "url": "https://jfrog.com/blog-author/shaked-zychlinski/",
         "enabled": true,
-        "language": "en"
-      },
-      {
-        "name": "Taboola Engineering", 
-        "url": "https://www.taboola.com/author/shakedzy/",
-        "enabled": true,
-        "language": "en"
+        "type": "scrape",
+        "language": "en",
+        "xpath": "//div[contains(@class, 'latest-posts-from-blog-author')]"
       }
     ]
   },

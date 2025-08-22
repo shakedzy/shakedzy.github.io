@@ -4,17 +4,22 @@ Content Fetcher for Personal Website
 Automatically fetches content from various sources and updates JSON files.
 """
 
+import re
+import os
+import sys
+import time
 import json
 import requests
 import feedparser
-import re
 import xml.etree.ElementTree as ET
+from dotenv import load_dotenv
 from datetime import datetime, timezone
-from typing import List, Dict, Any
-from urllib.parse import urljoin, urlparse, parse_qs
-import time
-import os
-import sys
+from bs4 import BeautifulSoup
+
+load_dotenv(override=True)
+ssl_verify = False
+user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+
 
 class ContentFetcher:
     def __init__(self, base_path: str = "."):
@@ -22,7 +27,7 @@ class ContentFetcher:
         self.data_path = os.path.join(base_path, "data")
         self.sources_config = self.load_sources_config()
         
-    def load_sources_config(self) -> Dict:
+    def load_sources_config(self) -> dict:
         """Load content sources configuration from content.json"""
         try:
             with open(os.path.join(self.base_path, "content.json"), 'r') as f:
@@ -71,19 +76,7 @@ class ContentFetcher:
                         "podcasts": sources_config["spotify"]["podcasts"]
                     })
                 
-                # Blog sources
-                for blog in sources_config.get("blogs", []):
-                    if blog.get("enabled"):
-                        sources.append({
-                            "id": blog["name"].lower().replace(" ", "_"),
-                            "name": blog["name"],
-                            "type": "scrape",
-                            "url": blog["url"],
-                            "icon": "fas fa-blog", 
-                            "platform": blog["name"],
-                            "enabled": True,
-                            "language": blog.get("language", "en")
-                        })
+                # Blog sources are processed separately, not added to main sources list
                 
                 return {"sources": sources}
                 
@@ -94,7 +87,7 @@ class ContentFetcher:
             print(f"❌ Missing key in content.json: {e}")
             return {"sources": []}
     
-    def load_talks_data(self) -> Dict:
+    def load_talks_data(self) -> dict:
         """Load existing talks data"""
         try:
             with open(os.path.join(self.data_path, "talks.json"), 'r') as f:
@@ -102,22 +95,23 @@ class ContentFetcher:
         except FileNotFoundError:
             return {"manual_items": [], "auto_fetched": []}
     
-    def save_talks_data(self, data: Dict):
+    def save_talks_data(self, data: dict):
         """Save updated talks data"""
         with open(os.path.join(self.data_path, "talks.json"), 'w') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         print(f"✅ Saved talks data with {len(data.get('auto_fetched', []))} auto-fetched items")
     
-    def fetch_medium_rss(self, url: str) -> List[Dict]:
+    def fetch_medium_rss(self, url: str) -> list[dict]:
         """Fetch articles from Medium RSS feed"""
         print(f"📡 Fetching Medium RSS: {url}")
         
         try:
             # Add user agent to avoid being blocked
             headers = {
-                'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                'User-Agent': user_agent
             }
-            response = requests.get(url, headers=headers, timeout=10)
+            # Disable SSL verification for external sites to avoid certificate issues
+            response = requests.get(url, headers=headers, timeout=10, verify=ssl_verify)
             response.raise_for_status()
             
             feed = feedparser.parse(response.content)
@@ -145,6 +139,9 @@ class ContentFetcher:
                         if len(description) > 120:
                             description = description[:120] + "..."
                     
+                    # Try to get claps (Medium's engagement metric) from the article page
+                    claps = self.get_medium_claps(entry.link)
+                    
                     article = {
                         "id": f"medium_{abs(hash(entry.link)) % 10000}",
                         "title": title,
@@ -153,12 +150,13 @@ class ContentFetcher:
                         "link": entry.link,
                         "icon": "fab fa-medium",
                         "date": published.strftime("%Y-%m-%d"),
-                        "views": "N/A",  # Medium doesn't provide view counts in RSS
+                        "claps": claps,  # Use claps instead of views
                         "source": "medium",
-                        "description": description
+                        "description": description,
+                        "language": "en"  # Medium is English
                     }
                     articles.append(article)
-                    print(f"   📄 {title}")
+                    print(f"   📄 {title} ({claps} claps)" if claps else f"   📄 {title}")
                     
                 except Exception as e:
                     print(f"   ⚠️  Skipping entry due to error: {e}")
@@ -170,144 +168,519 @@ class ContentFetcher:
         except Exception as e:
             print(f"❌ Error fetching Medium RSS: {e}")
             print(f"   URL: {url}")
-            print("📝 Using fallback Medium articles...")
-            
-            # Fallback with known articles from shakedzy.medium.com
-            return [
-                {
-                    "id": "medium_1",
-                    "title": "Tiny but Mighty: Extracting Complete Article from Screen-Recording Using Local Models",
-                    "platform": "Medium",
-                    "type": "Technical Article",
-                    "link": "https://shakedzy.medium.com/tiny-but-mighty-extracting-complete-article-from-screen-recording-using-local-models",
-                    "icon": "fab fa-medium",
-                    "date": "2025-01-27",
-                    "views": "2.1K",
-                    "source": "medium",
-                    "description": "Imitating capabilities of SOTA models with stuff that can run on your laptop"
-                },
-                {
-                    "id": "medium_2",
-                    "title": "Introducing the First-Ever AI Magazine & Podcast Made By AI",
-                    "platform": "Medium",
-                    "type": "Innovation Article",
-                    "link": "https://shakedzy.medium.com/introducing-the-first-ever-ai-magazine-podcast-made-by-ai",
-                    "icon": "fab fa-medium",
-                    "date": "2024-04-29",
-                    "views": "4.2K",
-                    "source": "medium",
-                    "description": "An Exploration into Automated News Generation with No Human Oversight"
-                },
-                {
-                    "id": "medium_3",
-                    "title": "7 Lessons Learned on Creating a Complete Product Using ChatGPT",
-                    "platform": "Medium",
-                    "type": "Development Guide",
-                    "link": "https://shakedzy.medium.com/7-lessons-learned-on-creating-a-complete-product-using-chatgpt",
-                    "icon": "fab fa-medium",
-                    "date": "2023-08-05",
-                    "views": "8.1K",
-                    "source": "medium",
-                    "description": "ChatGPT's coding abilities make it super easy to code entire products in no-time"
-                },
-                {
-                    "id": "medium_4",
-                    "title": "How I Coded My Own Private French Tutor Out of ChatGPT",
-                    "platform": "Medium",
-                    "type": "AI Tutorial",
-                    "link": "https://shakedzy.medium.com/how-i-coded-my-own-private-french-tutor-out-of-chatgpt",
-                    "icon": "fab fa-medium",
-                    "date": "2023-06-30",
-                    "views": "12.3K",
-                    "source": "medium",
-                    "description": "Step-by-step guide to how I used the latest AI services to teach me a new language"
-                },
-                {
-                    "id": "medium_5",
-                    "title": "Six Lessons Learned From Hyper-Growing a Data-Science Group",
-                    "platform": "Medium",
-                    "type": "Leadership Article",
-                    "link": "https://shakedzy.medium.com/six-lessons-learned-from-hyper-growing-a-data-science-group",
-                    "icon": "fab fa-medium",
-                    "date": "2023-03-13",
-                    "views": "5.7K",
-                    "source": "medium",
-                    "description": "Some counter-intuitive and highly-effective insights I learned while establishing a group of ten Data Scientists"
-                },
-                {
-                    "id": "medium_6",
-                    "title": "6 Papers Every Modern Data Scientist Must Read",
-                    "platform": "Medium",
-                    "type": "Educational Article",
-                    "link": "https://shakedzy.medium.com/6-papers-every-modern-data-scientist-must-read",
-                    "icon": "fab fa-medium",
-                    "date": "2022-07-31",
-                    "views": "19K",
-                    "source": "medium",
-                    "description": "A list of some of the most important modern fundamentals of Deep Learning everyone in the field should be familiar with"
-                }
-            ]
+            return []
     
-    def fetch_jfrog_blog(self, url: str) -> List[Dict]:
+    def get_medium_claps(self, article_url: str) -> str | None:
+        """Get claps count from Medium article page"""
+        try:
+            headers = {
+                'User-Agent': user_agent
+            }
+            response = requests.get(article_url, headers=headers, timeout=10, verify=ssl_verify)
+            response.raise_for_status()
+            
+            # Look for claps data in the page
+            content = response.text
+            
+            # Try to find claps in JSON-LD data
+            json_ld_match = re.search(r'<script type="application/ld\+json">(.*?)</script>', content, re.DOTALL)
+            if json_ld_match:
+                try:
+                    json_data = json.loads(json_ld_match.group(1))
+                    if isinstance(json_data, dict) and 'interactionStatistic' in json_data:
+                        for stat in json_data['interactionStatistic']:
+                            if stat.get('interactionType') == 'https://schema.org/LikeAction':
+                                claps = stat.get('userInteractionCount', 0)
+                                if claps > 0:
+                                    return self.format_claps(claps)
+                except:
+                    pass
+            
+            # Fallback: look for claps in HTML
+            claps_match = re.search(r'"clapCount":(\d+)', content)
+            if claps_match:
+                claps = int(claps_match.group(1))
+                return self.format_claps(claps)
+            
+            return None
+            
+        except Exception as e:
+            print(f"   ⚠️  Could not fetch claps for {article_url}: {e}")
+            return None
+    
+    def format_claps(self, claps: int) -> str:
+        """Format claps count nicely"""
+        if claps >= 1000000:
+            return f"{claps/1000000:.1f}M"
+        elif claps >= 1000:
+            return f"{claps/1000:.1f}K"
+        else:
+            return str(claps)
+    
+    def fetch_jfrog_blog(self, url: str, xpath: str = None) -> list[dict]:
         """Fetch articles from JFrog blog author page"""
         print(f"📡 Fetching JFrog blog: {url}")
         
-        # This would require web scraping - for now return mock data
-        # In a real implementation, you'd parse the HTML page
-        articles = [
-            {
-                "id": "jfrog_1", 
-                "title": "Taking a GenAI Project to Production",
-                "platform": "JFrog",
-                "type": "Technical Article",
-                "link": "https://jfrog.com/blog/taking-a-genai-project-to-production/",
-                "icon": "fas fa-blog",
-                "date": "2024-06-10",
-                "views": "3.5K",
-                "source": "jfrog",
-                "description": "Generative AI and Large Language Models (LLMs) are the new revolution of Artificial Intelligence"
+        try:
+            headers = {
+                'User-Agent': user_agent
             }
-        ]
-        
-        print(f"✅ Fetched {len(articles)} JFrog articles")
-        return articles
+            response = requests.get(url, headers=headers, timeout=10, verify=ssl_verify)
+            response.raise_for_status()
+            
+            # Parse HTML content
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            articles = []
+            
+            # If XPath is provided, use it to find the specific section
+            if xpath:
+                print(f"   🎯 Using XPath selector: {xpath}")
+                target_section = None
+                
+                # Convert XPath to CSS selector approximation for BeautifulSoup
+                if "latest-posts-from-blog-author" in xpath:
+                    target_section = soup.find('div', class_='latest-posts-from-blog-author')
+                    print(f"   🔍 Looking for div with class 'latest-posts-from-blog-author'")
+                    if target_section:
+                        print(f"   ✅ Found latest-posts-from-blog-author div")
+                    else:
+                        print(f"   ❌ latest-posts-from-blog-author div not found")
+                elif "site-content" in xpath:
+                    # For Taboola: //*[@id='site-content']/section[2]/div/div/div/div
+                    site_content = soup.find('div', id='site-content')
+                    if site_content:
+                        print(f"   🔍 Found site-content div, looking for section[2]")
+                        sections = site_content.find_all('section')
+                        if len(sections) >= 2:
+                            target_section = sections[1]  # section[2] is index 1
+                            print(f"   ✅ Found section[2], now looking for div/div/div/div")
+                            # Navigate through the div hierarchy more carefully
+                            current = target_section
+                            for i in range(4):  # div/div/div/div
+                                divs = current.find_all('div', recursive=False)
+                                if divs:
+                                    # Try to find the right div - look for one with content
+                                    best_div = divs[0]  # Default to first
+                                    for div in divs:
+                                        # Check if this div has meaningful content
+                                        if div.find_all('a', href=True):
+                                            best_div = div
+                                            break
+                                    current = best_div
+                                    print(f"      Level {i+1}: Found {len(divs)} divs, selected one with {len(current.find_all('a', href=True))} links")
+                                else:
+                                    print(f"      Level {i+1}: No divs found")
+                                    break
+                            target_section = current
+                        else:
+                            print(f"   ⚠️  Only found {len(sections)} sections, need at least 2")
+                            # Fallback: try to find any section with content
+                            print(f"   🔄 Fallback: looking for any section with content")
+                            for section in sections:
+                                if section.find_all('a', href=True):
+                                    target_section = section
+                                    print(f"   ✅ Found section with {len(target_section.find_all('a', href=True))} links")
+                                    break
+                    else:
+                        print(f"   ❌ site-content div not found")
+                        # Fallback: try to find any div with id containing 'content'
+                        print(f"   🔄 Fallback: looking for any content div")
+                        content_divs = soup.find_all('div', id=re.compile(r'content'))
+                        if content_divs:
+                            target_section = content_divs[0]
+                            print(f"   ✅ Found content div with {len(target_section.find_all('a', href=True))} links")
+                else:
+                    print(f"   ⚠️  Unknown XPath pattern: {xpath}")
+                
+                if target_section:
+                    print(f"   🎯 Target section found, extracting links...")
+                    blog_links = target_section.find_all('a', href=True)
+                    print(f"   🔍 Found {len(blog_links)} links in target section")
+                    
+                    # If no links found in target section, allow fallback for Taboola
+                    if len(blog_links) == 0 and "site-content" in xpath:
+                        print(f"   🔄 Target section is empty, allowing fallback to entire page for Taboola")
+                        blog_links = soup.find_all('a', href=True)
+                        print(f"   🔍 Fallback found {len(blog_links)} links in entire page")
+                else:
+                    print(f"   ❌ Target section not found, XPath targeting failed")
+                    # For Taboola, allow fallback to entire page to get content back
+                    if "site-content" in xpath:
+                        print(f"   🔄 Allowing fallback to entire page for Taboola")
+                        blog_links = soup.find_all('a', href=True)
+                    else:
+                        print(f"   📝 Will NOT search entire page - respecting XPath boundaries")
+                        blog_links = []  # Empty list to force no results
+            else:
+                # Look for ONLY actual blog post links - be very selective
+                blog_links = soup.find_all('a', href=True)
+            
+            found_articles = set()  # Track found articles to avoid duplicates
+            
+            # Process ONLY blog post links with very strict filtering
+            for link in blog_links[:50]:  # Check more links to find actual posts
+                href = str(link.get('href', ''))
+                title = link.get_text().strip()
+                
+                # VERY STRICT filtering - only actual blog posts
+                if (href and 
+                    title and 
+                    len(title) > 20 and  # Longer titles are more likely to be articles
+                    len(title) < 200 and  # But not too long
+                    '/blog/' in href and  # Must contain /blog/ in URL
+                    not title.lower().startswith('http') and
+                    not title.lower().startswith('www') and
+                    title.lower() not in ['read more', 'continue reading', 'blog', 'home', 'about', 'back to blog', 'engineering blog', 'community', 'documentation', 'integrations', 'applications'] and
+                    not href.startswith('#') and
+                    not href.startswith('mailto:') and
+                    not href.startswith('tel:') and
+                    not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination'])):
+                    
+                    # Get full URL
+                    if href.startswith('/'):
+                        full_url = f"https://jfrog.com{href}"
+                    elif href.startswith('http'):
+                        full_url = href
+                    else:
+                        full_url = f"https://jfrog.com/{href}"
+                    
+                    # Skip if we already found this article
+                    if full_url in found_articles:
+                        continue
+                    
+                    # Additional validation - check if the URL looks like a blog post
+                    if not any(post_indicator in full_url.lower() for post_indicator in ['/blog/', '/post/', '/article/', '/news/', '/insights/']):
+                        continue
+                    
+                    found_articles.add(full_url)
+                    
+                    # Try to get article metadata
+                    article_data = self.get_jfrog_article_metadata(full_url)
+                    
+                    article = {
+                        "id": f"jfrog_{abs(hash(full_url)) % 10000}",
+                        "title": title,
+                        "platform": "JFrog",
+                        "type": "Technical Article",
+                        "link": full_url,
+                        "icon": "fas fa-blog",
+                        "date": article_data.get('date', 'Unknown'),
+                        "views": article_data.get('views'),
+                        "source": "jfrog",
+                        "description": article_data.get('description', ''),
+                        "language": "en"
+                    }
+                    articles.append(article)
+                    print(f"   📄 {title}")
+            
+            # If XPath was provided, ONLY use content from the target section - no fallback to entire page
+            if xpath and len(articles) < 3:
+                print(f"   ⚠️  Only found {len(articles)} articles in XPath section '{xpath}' - respecting boundaries")
+                print(f"   📝 XPath targeting is working - only extracting from specified section")
+            elif not xpath and len(articles) < 3:
+                print(f"   🔍 Only found {len(articles)} articles, looking for more blog-like content...")
+                for link in blog_links[:100]:
+                    href = str(link.get('href', ''))
+                    title = link.get_text().strip()
+                    
+                    # Look for any remaining content that might be blog posts
+                    if (href and 
+                        title and 
+                        len(title) > 25 and  # Even longer titles
+                        len(title) < 150 and
+                        not title.lower().startswith('http') and
+                        not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination', 'community', 'documentation', 'integrations', 'applications', 'resources', 'partners', 'about', 'contact', 'privacy', 'terms', 'cookies', 'sitemap']) and
+                        not href.startswith('#') and
+                        not href.startswith('mailto:') and
+                        not href.startswith('tel:')):
+                        
+                        # Get full URL
+                        if href.startswith('/'):
+                            full_url = f"https://jfrog.com{href}"
+                        elif href.startswith('http'):
+                            full_url = href
+                        else:
+                            full_url = f"https://jfrog.com/{href}"
+                        
+                        # Skip if we already found this article
+                        if full_url in found_articles:
+                            continue
+                        
+                        found_articles.add(full_url)
+                        
+                        # Try to get article metadata
+                        article_data = self.get_jfrog_article_metadata(full_url)
+                        
+                        article = {
+                            "id": f"jfrog_{abs(hash(full_url)) % 10000}",
+                            "title": title,
+                            "platform": "JFrog",
+                            "type": "Technical Article",
+                            "link": full_url,
+                            "icon": "fas fa-blog",
+                            "date": article_data.get('date', 'Unknown'),
+                            "views": article_data.get('views'),
+                            "source": "jfrog",
+                            "description": article_data.get('description', ''),
+                            "language": "en"
+                        }
+                        articles.append(article)
+                        print(f"   📄 {title}")
+                        
+                        if len(articles) >= 5:  # Limit to 5 articles max
+                            break
+            
+            print(f"✅ Fetched {len(articles)} JFrog articles")
+            return articles
+            
+        except Exception as e:
+            print(f"❌ Error fetching JFrog blog: {e}")
+            return []
     
-    def fetch_taboola_blog(self, url: str) -> List[Dict]:
+    def get_jfrog_article_metadata(self, article_url: str) -> dict:
+        """Get metadata from JFrog article page"""
+        try:
+            headers = {
+                'User-Agent': user_agent
+            }
+            response = requests.get(article_url, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extract description
+            description = ""
+            meta_desc = soup.find('meta', attrs={'name': 'description'})
+            if meta_desc and meta_desc.get('content'):
+                content = str(meta_desc.get('content', ''))
+                if len(content) > 120:
+                    description = content[:120] + "..."
+                else:
+                    description = content
+            
+            # Extract date
+            date = "Unknown"
+            date_elem = soup.find('time') or soup.find(class_=re.compile(r'date|published|time'))
+            if date_elem:
+                date_text = date_elem.get_text().strip()
+                if date_text:
+                    date = date_text
+            
+            return {
+                'description': description,
+                'date': date,
+                'views': None  # JFrog doesn't typically show view counts
+            }
+            
+        except Exception as e:
+            print(f"   ⚠️  Could not fetch metadata for {article_url}: {e}")
+            return {'description': '', 'date': 'Unknown', 'views': None}
+    
+    def fetch_taboola_blog(self, url: str, xpath: str = None) -> list[dict]:
         """Fetch articles from Taboola blog author page"""
         print(f"📡 Fetching Taboola blog: {url}")
         
-        # This would require web scraping - for now return existing data
-        articles = [
-            {
-                "id": "taboola_1",
-                "title": "Going Old-School: Designing Algorithms for Fast Weighted Sampling in Production",
-                "platform": "Taboola",
-                "type": "Engineering Article", 
-                "link": "https://www.taboola.com/blog/fast-weighted-sampling-production/",
-                "icon": "fas fa-code",
-                "date": "2019-06-06",
-                "views": "6.4K",
-                "source": "taboola",
-                "description": "Algorithms for production systems"
-            },
-            {
-                "id": "taboola_2",
-                "title": "Predicting Probability Distributions Using Neural Networks",
-                "platform": "Taboola", 
-                "type": "Data Science Article",
-                "link": "https://www.taboola.com/blog/predicting-probability-distributions-neural-networks/",
-                "icon": "fas fa-code",
-                "date": "2018-11-13", 
-                "views": "4.8K",
-                "source": "taboola",
-                "description": "Using neural networks for probability prediction"
+        try:
+            headers = {
+                'User-Agent': user_agent
             }
-        ]
-        
-        print(f"✅ Fetched {len(articles)} Taboola articles")
-        return articles
+            response = requests.get(url, headers=headers, timeout=10, verify=ssl_verify)
+            response.raise_for_status()
+            
+            # Parse HTML content
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            articles = []
+            
+            # If XPath is provided, use it to find the specific section
+            if xpath:
+                print(f"   🎯 Using XPath selector: {xpath}")
+                # Convert XPath to CSS selector approximation for BeautifulSoup
+                if "site-content" in xpath:
+                    target_section = soup.find('div', id='site-content')
+                    if target_section:
+                        # Navigate to section[2]/div/div/div/div
+                        sections = target_section.find_all('section')
+                        if len(sections) >= 2:
+                            target_section = sections[1]  # section[2] is index 1
+                        else:
+                            target_section = soup
+                else:
+                    # Fallback to searching the entire page
+                    target_section = soup
+                
+                if target_section:
+                    blog_links = target_section.find_all('a', href=True)
+                    print(f"   🔍 Found {len(blog_links)} links in target section")
+                else:
+                    print(f"   ⚠️  Target section not found, searching entire page")
+                    blog_links = soup.find_all('a', href=True)
+            else:
+                # Look for blog post links - adjust selectors based on Taboola's actual HTML structure
+                blog_links = soup.find_all('a', href=True)
+            
+            # Also look for article/post elements
+            post_elements = soup.find_all(['article', 'div'], class_=re.compile(r'post|article|entry|blog'))
+            
+            found_articles = set()  # Track found articles to avoid duplicates
+            
+            # Process ONLY actual blog post links with very strict filtering
+            for link in blog_links[:50]:  # Check more links to find actual posts
+                href = str(link.get('href', ''))
+                title = link.get_text().strip()
+                
+                # VERY STRICT filtering - only actual blog posts
+                if (href and 
+                    title and 
+                    len(title) > 20 and  # Longer titles are more likely to be articles
+                    len(title) < 200 and  # But not too long
+                    any(path in href for path in ['/blog/', '/post/', '/article/', '/engineering/']) and  # Must contain blog-related paths
+                    not title.lower().startswith('http') and
+                    not title.lower().startswith('www') and
+                    title.lower() not in ['read more', 'continue reading', 'blog', 'home', 'about', 'engineering blog', 'community', 'documentation', 'integrations', 'applications', 'resources', 'partners', 'social responsibility', 'glossary', 'quickstart', 'webinars', 'trends', 'marketing'] and
+                    not href.startswith('#') and
+                    not href.startswith('mailto:') and
+                    not href.startswith('tel:') and
+                    not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination'])):
+                    
+                    # Get full URL
+                    if href.startswith('/'):
+                        full_url = f"https://www.taboola.com{href}"
+                    elif href.startswith('http'):
+                        full_url = href
+                    else:
+                        full_url = f"https://www.taboola.com/{href}"
+                    
+                    # Skip if we already found this article
+                    if full_url in found_articles:
+                        continue
+                    
+                    # Additional validation - check if the URL looks like a blog post
+                    if not any(post_indicator in full_url.lower() for post_indicator in ['/blog/', '/post/', '/article/', '/news/', '/insights/', '/engineering/']):
+                        continue
+                    
+                    found_articles.add(full_url)
+                    
+                    # Try to get article metadata
+                    article_data = self.get_taboola_article_metadata(full_url)
+                    
+                    article = {
+                        "id": f"taboola_{abs(hash(full_url)) % 10000}",
+                        "title": title,
+                        "platform": "Taboola",
+                        "type": "Engineering Article",
+                        "link": full_url,
+                        "icon": "fas fa-code",
+                        "date": article_data.get('date', 'Unknown'),
+                        "views": article_data.get('views'),
+                        "source": "taboola",
+                        "description": article_data.get('description', ''),
+                        "language": "en"
+                    }
+                    articles.append(article)
+                    print(f"   📄 {title}")
+            
+            # If XPath was provided, ONLY use content from the target section - no fallback to entire page
+            if xpath and len(articles) < 3:
+                print(f"   ⚠️  Only found {len(articles)} articles in XPath section '{xpath}' - respecting boundaries")
+                print(f"   📝 XPath targeting is working - only extracting from specified section")
+            elif not xpath and len(articles) < 3:
+                print(f"   🔍 Only found {len(articles)} articles, looking for more blog-like content...")
+                for link in blog_links[:100]:
+                    href = str(link.get('href', ''))
+                    title = link.get_text().strip()
+                    
+                    # Look for any remaining content that might be blog posts
+                    if (href and 
+                        title and 
+                        len(title) > 25 and  # Even longer titles
+                        len(title) < 150 and
+                        not title.lower().startswith('http') and
+                        not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination', 'community', 'documentation', 'integrations', 'applications', 'resources', 'partners', 'about', 'contact', 'privacy', 'terms', 'cookies', 'sitemap', 'social responsibility', 'glossary', 'quickstart', 'webinars', 'trends', 'marketing']) and
+                        not href.startswith('#') and
+                        not href.startswith('mailto:') and
+                        not href.startswith('tel:')):
+                        
+                        # Get full URL
+                        if href.startswith('/'):
+                            full_url = f"https://www.taboola.com{href}"
+                        elif href.startswith('http'):
+                            full_url = href
+                        else:
+                            full_url = f"https://www.taboola.com/{href}"
+                        
+                        found_articles.add(full_url)
+                        
+                        # Try to get article metadata
+                        article_data = self.get_taboola_article_metadata(full_url)
+                        
+                        article = {
+                            "id": f"taboola_{abs(hash(full_url)) % 10000}",
+                            "title": title,
+                            "platform": "Taboola",
+                            "type": "Engineering Article",
+                            "link": full_url,
+                            "icon": "fas fa-code",
+                            "date": article_data.get('date', 'Unknown'),
+                            "views": article_data.get('views'),
+                            "source": "taboola",
+                            "description": article_data.get('description', ''),
+                            "language": "en"
+                        }
+                        articles.append(article)
+                        print(f"   📄 {title}")
+                        
+                        if len(articles) >= 5:  # Limit to 5 articles max
+                            break
+            
+            print(f"✅ Fetched {len(articles)} Taboola articles")
+            return articles
+            
+        except Exception as e:
+            print(f"❌ Error fetching Taboola blog: {e}")
+            return []
     
-    def fetch_spotify_episodes(self, source_config: Dict) -> List[Dict]:
+    def get_taboola_article_metadata(self, article_url: str) -> dict:
+        """Get metadata from Taboola article page"""
+        try:
+            headers = {
+                'User-Agent': user_agent
+            }
+            response = requests.get(article_url, headers=headers, timeout=10)
+            response.raise_for_status()
+            
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
+            # Extract description
+            description = ""
+            meta_desc = soup.find('meta', attrs={'name': 'description'})
+            if meta_desc and meta_desc.get('content'):
+                content = str(meta_desc.get('content', ''))
+                if len(content) > 120:
+                    description = content[:120] + "..."
+                else:
+                    description = content
+            
+            # Extract date
+            date = "Unknown"
+            date_elem = soup.find('time') or soup.find(class_=re.compile(r'date|published|time'))
+            if date_elem:
+                date_text = date_elem.get_text().strip()
+                if date_text:
+                    date = date_text
+            
+            return {
+                'description': description,
+                'date': date,
+                'views': None  # Taboola doesn't typically show view counts
+            }
+            
+        except Exception as e:
+            print(f"   ⚠️  Could not fetch metadata for {article_url}: {e}")
+            return {'description': '', 'date': 'Unknown', 'views': None}
+    
+    def fetch_spotify_episodes(self, source_config: dict) -> list[dict]:
         """Fetch episodes from Spotify podcasts"""
         print("📡 Fetching Spotify podcast episodes")
         
@@ -326,10 +699,12 @@ class ContentFetcher:
                     print(f"   ❌ No URL provided for {podcast_name}")
                     continue
                 
-                # Extract show ID from Spotify URL
+                # Extract show ID from Spotify URL (supports both open.spotify.com and creators.spotify.com)
                 show_id = None
                 if 'open.spotify.com/show/' in podcast_url:
                     show_id = podcast_url.split('/show/')[-1].split('?')[0]
+                elif 'creators.spotify.com/pod/profile/' in podcast_url:
+                    show_id = podcast_url.split('/pod/profile/')[-1].rstrip('/')
                 
                 if not show_id:
                     print(f"   ❌ Could not extract show ID from URL: {podcast_url}")
@@ -351,82 +726,331 @@ class ContentFetcher:
             print(f"❌ Error fetching Spotify episodes: {e}")
             return []
     
-    def get_spotify_show_episodes(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> List[Dict]:
-        """Get episodes from a Spotify show using web scraping as fallback"""
+    def get_spotify_show_episodes(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> list[dict]:
+        """Get episodes from a Spotify show using Spotify Web API"""
         try:
-            # Create sample episodes for now (since Spotify API requires auth)
-            # This is a placeholder that creates realistic episodes based on your podcast info
+            # Try to use Spotify Web API first (more reliable)
+            episodes = self.get_spotify_episodes_via_api(show_id, show_name, language, max_episodes)
+            if episodes:
+                return episodes
+            
+            # Fallback to web scraping if API doesn't work
+            print(f"   🔄 API failed, trying web scraping...")
+            return self.get_spotify_episodes_via_scraping(show_id, show_name, language, max_episodes)
+            
+        except Exception as e:
+            print(f"   ❌ Error getting episodes for show {show_id}: {e}")
+            return []
+    
+    def get_spotify_episodes_via_api(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> list[dict]:
+        """Get episodes using Spotify creators page (much better for scraping)"""
+        try:
+            # Use the creators.spotify.com URL which is much better for scraping
+            creators_url = f"https://creators.spotify.com/pod/profile/{show_id}/"
+            headers = {
+                'User-Agent': user_agent,
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
+            }
+            
+            response = requests.get(creators_url, headers=headers, timeout=10, verify=ssl_verify)
+            if response.status_code == 200:
+                # Parse the creators page to extract episode information
+                soup = BeautifulSoup(response.content, 'html.parser')
+                
+                episodes = []
+                
+                # Look specifically for the episodeFeed div which contains all episodes
+                episode_feed = soup.find('div', attrs={'data-cy': 'episodeFeed'})
+                
+                if episode_feed:
+                    print(f"   🎯 Found episodeFeed div, extracting episodes...")
+                    
+                    # Find all episode links within the episodeFeed
+                    episode_links = episode_feed.find_all('a', href=True)
+                    
+                    if episode_links:
+                        print(f"   🔄 Found {len(episode_links)} episode links in episodeFeed, extracting...")
+                        
+                        for i, link_elem in enumerate(episode_links[:max_episodes]):
+                            try:
+                                # Extract title from the episodeFeedTitle - try multiple selectors
+                                title_elem = (link_elem.find('div', attrs={'data-cy': 'episodeFeedTitle'}) or 
+                                            link_elem.find('h4') or 
+                                            link_elem.find('div', class_=re.compile(r'dYAFeC')))
+                                
+                                if not title_elem:
+                                    continue
+                                
+                                title = title_elem.get_text().strip()
+                                if not title or len(title) < 5:
+                                    continue
+                                
+                                # Extract description from the episode content - try multiple selectors
+                                desc_elem = (link_elem.find('span', class_=re.compile(r'sc-kLWOiw|sc-ieSnRl')) or
+                                           link_elem.find('span', class_=re.compile(r'fCcxuM|fXlJJi')) or
+                                           link_elem.find('div', class_=re.compile(r'gLytag')))
+                                
+                                description = ""
+                                if desc_elem:
+                                    desc_text = desc_elem.get_text().strip()
+                                    if desc_text and len(desc_text) > 10:
+                                        description = desc_text[:120] + "..." if len(desc_text) > 120 else desc_text
+                                
+                                # Extract date from the episode metadata - try multiple selectors
+                                # Look for date elements with more specific patterns
+                                date_elem = None
+                                
+                                # Try to find date in various locations within the episode link
+                                date_selectors = [
+                                    'span[class*="date"]',
+                                    'span[class*="time"]', 
+                                    'span[class*="published"]',
+                                    'time',
+                                    'div[class*="date"]',
+                                    'div[class*="time"]',
+                                    'div[class*="published"]'
+                                ]
+                                
+                                for selector in date_selectors:
+                                    date_elem = link_elem.select_one(selector)
+                                    if date_elem:
+                                        break
+                                
+                                # Also try to find any text that looks like a date pattern
+                                if not date_elem:
+                                    all_spans = link_elem.find_all('span')
+                                    for span in all_spans:
+                                        span_text = span.get_text().strip()
+                                        # Look for date patterns like "2024", "Jan", "2024-01", etc.
+                                        if (re.search(r'\b(20\d{2}|19\d{2})\b', span_text) or 
+                                            re.search(r'\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b', span_text, re.IGNORECASE) or
+                                            re.search(r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b', span_text)):
+                                            date_elem = span
+                                            break
+                                
+                                date = "Unknown"
+                                if date_elem:
+                                    date_text = date_elem.get_text().strip()
+                                    if date_text and len(date_text) > 2:
+                                        # Clean up the date text
+                                        date_text = re.sub(r'\s+', ' ', date_text).strip()
+                                        date = date_text
+                                        print(f"      📅 Found date: {date}")
+                                    else:
+                                        print(f"      ⚠️  Date text too short: '{date_text}'")
+                                else:
+                                    print(f"      ⚠️  No date element found for episode: {title}")
+                                
+                                # Extract link
+                                href = link_elem.get('href')
+                                if href and href.startswith('/'):
+                                    link = f"https://creators.spotify.com{href}"
+                                elif href and href.startswith('http'):
+                                    link = href
+                                else:
+                                    link = f"https://creators.spotify.com/pod/profile/{show_id}/"
+                                
+                                episode = {
+                                    "id": f"spotify_{show_id}_{i}",
+                                    "title": title,
+                                    "platform": "Spotify",
+                                    "type": "Podcast",
+                                    "link": link,
+                                    "icon": "fab fa-spotify",
+                                    "date": date,
+                                    "views": None,  # No views for podcasts
+                                    "source": "spotify",
+                                    "description": description or f"Episode of {show_name}",
+                                    "show_name": show_name,
+                                    "language": language
+                                }
+                                
+                                episodes.append(episode)
+                                print(f"   🎧 {title}")
+                                
+                            except Exception as e:
+                                print(f"   ⚠️  Error processing episode element: {e}")
+                                continue
+                        
+                        if episodes:
+                            print(f"   ✅ Successfully extracted {len(episodes)} episodes from episodeFeed")
+                            return episodes
+                else:
+                    print(f"   ❌ No episodeFeed div found on the page")
+                
+                # If no episodes found, try to extract from any text that looks like episode titles
+                all_text_elements = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'p'])
+                episode_titles = []
+                
+                for elem in all_text_elements:
+                    text = elem.get_text().strip()
+                    # Look for text that might be episode titles
+                    if (text and 
+                        len(text) > 10 and 
+                        len(text) < 100 and
+                        not text.lower().startswith('http') and
+                        not text.lower() in ['home', 'about', 'contact', 'privacy', 'terms'] and
+                        not text.isupper()):
+                        episode_titles.append(text)
+                
+                if episode_titles:
+                    print(f"   🔄 Found {len(episode_titles)} potential episode titles, creating episodes...")
+                    
+                    for i, title in enumerate(episode_titles[:max_episodes]):
+                        episode = {
+                            "id": f"spotify_{show_id}_{i}",
+                            "title": title,
+                            "platform": "Spotify",
+                            "type": "Podcast",
+                            "link": f"https://creators.spotify.com/pod/profile/{show_id}/",
+                            "icon": "fab fa-spotify",
+                            "date": datetime.now().strftime("%Y-%m-%d"),
+                            "views": None,
+                            "source": "spotify",
+                            "description": f"Episode of {show_name}",
+                            "show_name": show_name,
+                            "language": language
+                        }
+                        
+                        episodes.append(episode)
+                        print(f"   🎧 {title}")
+                    
+                    if episodes:
+                        return episodes
+            
+            # If all methods failed, create minimal placeholder
+            print(f"   📝 Could not extract episodes from creators page for {show_name}")
+            return []
+            
+        except Exception as e:
+            print(f"   ⚠️  Spotify creators method failed: {e}")
+            return []
+    
+    def get_spotify_episodes_via_scraping(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> list[dict]:
+        """Get episodes from a Spotify show using web scraping (fallback method)"""
+        try:
+            # Use web scraping to get real episode data from Spotify
+            show_url = f"https://open.spotify.com/show/{show_id}"
+            headers = {
+                'User-Agent': user_agent
+            }
+            
+            response = requests.get(show_url, headers=headers, timeout=10, verify=ssl_verify)
+            response.raise_for_status()
+            
+            # Parse HTML content
+            soup = BeautifulSoup(response.content, 'html.parser')
+            
             episodes = []
             
-            if "המחוללים" in show_name or "Generators" in show_name:
-                # Hebrew AI podcast episodes
-                sample_episodes = [
-                    {
-                        "title": "פרק 21: רא\"ג, לאן מכאן?",
-                        "description": "פרק משותף עם הפודקאסט \"אקספליינאבל\" על RAG ועל בעיית ההזיות של מודלי שפה",
-                        "date": "2024-12-02",
-                        "views": "1.2K"
-                    },
-                    {
-                        "title": "פרק 20: החלבון ושיברו", 
-                        "description": "על אינטליגנציה מלאכותית בשרות הרפואה והאדם, בריאות הגוף והנפש",
-                        "date": "2024-10-25",
-                        "views": "2.1K"
-                    },
-                    {
-                        "title": "פרק 19: נמר אסיאתי",
-                        "description": "על יכולות הבינה המלאכותית של סין ואיך הן עלולות לאיים על מעמד המערב",
-                        "date": "2024-09-24", 
-                        "views": "1.8K"
-                    },
-                    {
-                        "title": "פרק 18: והרי התחזית",
-                        "description": "המחוללים חוגג שנה, סיכום תחזיות העבר ותחזית לשנה הקרובה",
-                        "date": "2024-07-08",
-                        "views": "2.5K"
-                    }
-                ]
-            else:
-                # English podcast episodes (placeholder)
-                sample_episodes = [
-                    {
-                        "title": "The Future of AI in Production",
-                        "description": "Discussion on deploying AI systems at scale and production challenges",
-                        "date": "2024-11-15",
-                        "views": "3.2K"
-                    },
-                    {
-                        "title": "Machine Learning Operations Best Practices",
-                        "description": "Deep dive into MLOps practices and tools for modern data teams",
-                        "date": "2024-10-20",
-                        "views": "2.8K"
-                    }
-                ]
+            # Look for episode elements using the specific data-testid pattern I found
+            episode_elements = soup.find_all('div', attrs={'data-testid': lambda x: x and x.startswith('episode-')})
             
-            for i, episode_data in enumerate(sample_episodes[:max_episodes]):
-                episode = {
-                    "id": f"spotify_{show_id}_{i}",
-                    "title": episode_data["title"],
-                    "platform": "Spotify",
-                    "type": "Podcast",
-                    "link": f"https://open.spotify.com/show/{show_id}",
-                    "icon": "fab fa-spotify", 
-                    "date": episode_data["date"],
-                    "views": episode_data["views"],
-                    "source": "spotify",
-                    "description": episode_data["description"],
-                    "show_name": show_name,
-                    "language": language
-                }
-                episodes.append(episode)
+            if not episode_elements:
+                # Fallback: try to find any episode-like elements
+                episode_elements = soup.find_all(['div', 'span'], class_=re.compile(r'episode|track'))
+            
+            for i, episode_elem in enumerate(episode_elements[:max_episodes]):
+                try:
+                    # Extract episode title - try multiple approaches
+                    title = ""
+                    
+                    # Method 1: Look for data-testid="episodeTitle"
+                    title_elem = episode_elem.find('h4', attrs={'data-testid': 'episodeTitle'})
+                    if title_elem:
+                        title = title_elem.get_text().strip()
+                    
+                    # Method 2: Look for title in aria-label
+                    if not title:
+                        play_button = episode_elem.find('button', attrs={'data-testid': 'play-button'})
+                        if play_button and play_button.get('aria-label'):
+                            aria_label = play_button.get('aria-label')
+                            # Extract title from aria-label like "Play פרק 20: החלבון ושיברו by המחוללים"
+                            if 'by' in aria_label:
+                                title = aria_label.split('by')[0].replace('Play ', '').strip()
+                            else:
+                                title = aria_label.replace('Play ', '').strip()
+                    
+                    # Method 3: Fallback to generic title search
+                    if not title:
+                        title_elem = episode_elem.find(['h3', 'h4', 'span'], class_=re.compile(r'title|name'))
+                        if title_elem:
+                            title = title_elem.get_text().strip()
+                    
+                    if not title or len(title) < 5:
+                        continue
+                    
+                    # Extract description - look for the specific class I found
+                    description = ""
+                    desc_elem = episode_elem.find('p', attrs={'class': lambda x: x and 'asAGCceDzqi7tElU3KDh' in x})
+                    if desc_elem:
+                        description = desc_elem.get_text().strip()
+                    else:
+                        # Fallback: look for any description-like element
+                        desc_elem = episode_elem.find(['p', 'span'], class_=re.compile(r'description|summary'))
+                        if desc_elem:
+                            description = desc_elem.get_text().strip()
+                    
+                    # Extract date - look for the specific class I found
+                    date_str = ""
+                    date_elem = episode_elem.find('p', attrs={'class': lambda x: x and '_q93agegdE655O5zPz6l' in x})
+                    if date_str:
+                        date_str = date_elem.get_text().strip()
+                    
+                    # Parse date
+                    try:
+                        if date_str and ',' in date_str:
+                            # Handle formats like "Oct 25, 2024", "Sep 24, 2024"
+                            parsed_date = datetime.strptime(date_str, "%b %d, %Y")
+                            date = parsed_date.strftime("%Y-%m-%d")
+                        else:
+                            date = datetime.now().strftime("%Y-%m-%d")
+                    except ValueError:
+                        date = datetime.now().strftime("%Y-%m-%d")
+                    
+                    # Extract episode link if available
+                    link_elem = episode_elem.find('a')
+                    episode_link = show_url
+                    if link_elem and link_elem.get('href'):
+                        episode_link = f"https://open.spotify.com{link_elem.get('href')}"
+                    
+                    # Create episode object
+                    episode = {
+                        "id": f"spotify_{show_id}_{i}",
+                        "title": title,
+                        "platform": "Spotify",
+                        "type": "Podcast",
+                        "link": episode_link,
+                        "icon": "fab fa-spotify",
+                        "date": date,
+                        "views": None,  # Spotify doesn't show view counts publicly
+                        "source": "spotify",
+                        "description": description[:120] + "..." if len(description) > 120 else description,
+                        "show_name": show_name,
+                        "language": language
+                    }
+                    episodes.append(episode)
+                    print(f"   🎧 {title}")
+                    
+                except Exception as e:
+                    print(f"   ⚠️  Error processing episode {i}: {e}")
+                    continue
+            
+            # If web scraping didn't work, return empty list instead of mock data
+            if not episodes:
+                print(f"   ⚠️  No episodes found via web scraping for {show_name}")
+                return []
             
             return episodes
             
         except Exception as e:
-            print(f"   Error getting episodes for show {show_id}: {e}")
+            print(f"   ❌ Error getting episodes for show {show_id}: {e}")
             return []
     
-    def fetch_youtube_videos(self, channel_info: Dict) -> List[Dict]:
+    def fetch_youtube_videos(self, channel_info: dict) -> list[dict]:
         """Fetch videos from specific YouTube playlists"""
         print(f"📡 Fetching YouTube videos from playlists")
         
@@ -481,7 +1105,7 @@ class ContentFetcher:
             print(f"❌ Error fetching YouTube videos: {e}")
             return []
     
-    def fetch_github_repositories(self, username: str = "shakedzy") -> List[Dict]:
+    def fetch_github_repositories(self, username: str = "shakedzy") -> list[dict]:
         """Fetch repositories from GitHub API"""
         print(f"📡 Fetching GitHub repositories for {username}")
         
@@ -681,7 +1305,7 @@ class ContentFetcher:
             print(f"Error getting uploads playlist: {e}")
             return None
     
-    def get_playlist_videos(self, api_key: str, playlist_id: str, max_results: int = 10, playlist_name: str = "", language: str = "en") -> List[Dict]:
+    def get_playlist_videos(self, api_key: str, playlist_id: str, max_results: int = 10, playlist_name: str = "", language: str = "en") -> list[dict]:
         """Get videos from a playlist"""
         try:
             url = f"https://www.googleapis.com/youtube/v3/playlistItems"
@@ -732,7 +1356,7 @@ class ContentFetcher:
             print(f"Error getting playlist videos: {e}")
             return []
     
-    def get_video_statistics(self, api_key: str, video_id: str) -> Dict:
+    def get_video_statistics(self, api_key: str, video_id: str) -> dict:
         """Get video statistics including view count"""
         try:
             url = f"https://www.googleapis.com/youtube/v3/videos"
@@ -765,10 +1389,11 @@ class ContentFetcher:
             print(f"Error getting video statistics: {e}")
             return {}
     
-    def fetch_all_content(self) -> List[Dict]:
+    def fetch_all_content(self) -> list[dict]:
         """Fetch content from all enabled sources"""
         all_content = []
         
+        # Process main sources (Medium, YouTube, Spotify)
         for source in self.sources_config.get("sources", []):
             if not source.get("enabled", False):
                 continue
@@ -778,15 +1403,6 @@ class ContentFetcher:
             try:
                 if source["type"] == "rss" and source["id"] == "medium":
                     content = self.fetch_medium_rss(source["url"])
-                elif source["type"] == "scrape":
-                    # Handle all blog scraping sources
-                    if "jfrog" in source["name"].lower() or "jfrog" in source["id"]:
-                        content = self.fetch_jfrog_blog(source["url"])
-                    elif "taboola" in source["name"].lower() or "taboola" in source["id"]:
-                        content = self.fetch_taboola_blog(source["url"])
-                    else:
-                        print(f"⚠️  Unknown scrape source: {source['name']}")
-                        continue
                 elif source["id"] == "youtube":
                     content = self.fetch_youtube_videos(source)
                 elif source["id"] == "spotify":
@@ -805,6 +1421,42 @@ class ContentFetcher:
                 
             except Exception as e:
                 print(f"❌ Error processing {source['name']}: {e}")
+        
+        # Process blog sources separately
+        # Load blogs directly from content.json since they're not in sources_config
+        try:
+            with open(os.path.join(self.base_path, "content.json"), 'r') as f:
+                content = json.load(f)
+                blog_sources = content.get("content_sources", {}).get("blogs", [])
+        except Exception as e:
+            print(f"   ❌ Error loading blog sources: {e}")
+            blog_sources = []
+        
+        for blog_source in blog_sources:
+            if not blog_source.get("enabled", False):
+                continue
+                
+            print(f"\n🔄 Processing {blog_source['name']}...")
+            
+            try:
+                if "jfrog" in blog_source["name"].lower():
+                    xpath = blog_source.get("xpath")
+                    print(f"   🔍 JFrog XPath: {xpath}")
+                    content = self.fetch_jfrog_blog(blog_source["url"], xpath)
+                else:
+                    print(f"⚠️  Unknown blog source: {blog_source['name']}")
+                    continue
+                
+                # Add language tag to each content item
+                if blog_source.get("language"):
+                    for item in content:
+                        item["language"] = blog_source["language"]
+                
+                all_content.extend(content)
+                time.sleep(1)  # Rate limiting
+                
+            except Exception as e:
+                print(f"❌ Error processing {blog_source['name']}: {e}")
         
         return all_content
     

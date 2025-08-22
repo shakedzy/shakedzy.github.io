@@ -375,10 +375,11 @@ class PersonalWebsite {
                 </div>
                 <div class="talk-title">${talk.title}</div>
                 <div class="talk-type">${talk.type}</div>
+                ${talk.show_name ? `<div class="podcast-name">${talk.show_name}</div>` : ''}
                 ${talk.description ? `<div class="talk-description">${talk.description}</div>` : ''}
                 <div class="talk-meta">
                     <span>${this.formatDate(talk.date)}</span>
-                    <span>${talk.views} views</span>
+                    ${talk.claps && this.isSignificantClaps(talk.claps) ? `<span>${talk.claps} claps</span>` : (talk.views && talk.views !== 'N/A' && talk.type !== 'Podcast' ? `<span>${talk.views} views</span>` : '')}
                 </div>
             </a>
         `).join('') + `
@@ -410,6 +411,33 @@ class PersonalWebsite {
             return author;
         }).join(', ');
         return `<em>${authorList}</em>`;
+    }
+    
+    isSignificantClaps(claps) {
+        if (!claps) return false;
+        
+        // Handle string values like "1.1K", "500", etc.
+        if (typeof claps === 'string') {
+            // Remove any non-numeric characters except decimal points and K/M
+            const cleanClaps = claps.replace(/[^\d.KM]/g, '');
+            
+            if (cleanClaps.includes('K')) {
+                // Convert K to thousands (e.g., "1.1K" -> 1100)
+                const num = parseFloat(cleanClaps.replace('K', '')) * 1000;
+                return num >= 10;
+            } else if (cleanClaps.includes('M')) {
+                // Convert M to millions (e.g., "1.5M" -> 1500000)
+                const num = parseFloat(cleanClaps.replace('M', '')) * 1000000;
+                return num >= 10;
+            } else {
+                // Regular number
+                const num = parseFloat(cleanClaps);
+                return !isNaN(num) && num >= 10;
+            }
+        }
+        
+        // Handle numeric values
+        return typeof claps === 'number' && claps >= 10;
     }
 }
 
