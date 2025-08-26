@@ -67,7 +67,7 @@
   "content_sources": {
     "medium": {
       "enabled": true,
-      "rss_url": "https://shakedzy.medium.com/feed",
+      "username": "shakedzy",
       "language": "en"
     },
     "youtube": {
