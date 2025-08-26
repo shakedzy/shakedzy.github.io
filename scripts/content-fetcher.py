@@ -10,10 +10,9 @@ import sys
 import time
 import json
 import requests
-import feedparser
 import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
-from datetime import datetime, timezone
+from datetime import datetime
 from bs4 import BeautifulSoup
 
 load_dotenv(override=True)
@@ -43,7 +42,8 @@ class ContentFetcher:
                         "id": "medium",
                         "name": "Medium",
                         "type": "rss",
-                        "url": sources_config["medium"]["rss_url"],
+                        "url": f"https://medium.com/feed/@" + sources_config["medium"]["username"],
+                        "username": sources_config["medium"]["username"],
                         "icon": "fab fa-medium",
                         "platform": "Medium",
                         "enabled": True,
@@ -101,73 +101,46 @@ class ContentFetcher:
             json.dump(data, f, indent=2, ensure_ascii=False)
         print(f"✅ Saved talks data with {len(data.get('auto_fetched', []))} auto-fetched items")
     
-    def fetch_medium_rss(self, url: str) -> list[dict]:
+    def fetch_medium_rss(self, username: str) -> list[dict]:
         """Fetch articles from Medium RSS feed"""
-        print(f"📡 Fetching Medium RSS: {url}")
+        rss_url = f"https://medium.com/feed/@{username}"
+        api_url = "https://api.rss2json.com/v1/api.json"
+        print(f"📡 Fetching Medium RSS: {rss_url}")
         
         try:
-            # Add user agent to avoid being blocked
-            headers = {
-                'User-Agent': user_agent
-            }
-            # Disable SSL verification for external sites to avoid certificate issues
-            response = requests.get(url, headers=headers, timeout=10, verify=ssl_verify)
-            response.raise_for_status()
-            
-            feed = feedparser.parse(response.content)
+            resp = requests.get(api_url, params={"rss_url": rss_url})
+            resp.raise_for_status()
+            data = resp.json()
+
             articles = []
+            items = data.get("items", [])
+            for i, item in enumerate(items):
+                title = item.get("title", "")
+                content = item.get("content", "")
+                snippet = (BeautifulSoup(content, "html.parser")
+                        .get_text()[:100] + "…")
+                date = item.get("pubDate", "")
+                link = item.get("link", "")
+
+                articles.append({
+                    "id": f"medium_{i}",
+                    "title": title,
+                    "platform": "Medium",
+                    "type": "Article",
+                    "link": link,
+                    "icon": "fab fa-medium",
+                    "date": datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%b %d, %Y"),
+                    "claps": None,
+                    "source": "medium",
+                    "description": snippet,
+                    "language": "en"  
+                    })
             
-            print(f"Found {len(feed.entries)} entries in feed")
-            
-            for entry in feed.entries[:15]:  # Limit to 15 most recent
-                try:
-                    # Extract clean title
-                    title = entry.title
-                    
-                    # Get published date
-                    if hasattr(entry, 'published_parsed') and entry.published_parsed:
-                        published = datetime(*entry.published_parsed[:6], tzinfo=timezone.utc)
-                    else:
-                        published = datetime.now(timezone.utc)
-                    
-                    # Extract description/summary
-                    description = ""
-                    if hasattr(entry, 'summary'):
-                        # Clean HTML tags from summary
-                        description = re.sub(r'<[^>]+>', '', entry.summary)
-                        description = re.sub(r'\s+', ' ', description).strip()
-                        if len(description) > 120:
-                            description = description[:120] + "..."
-                    
-                    # Try to get claps (Medium's engagement metric) from the article page
-                    claps = self.get_medium_claps(entry.link)
-                    
-                    article = {
-                        "id": f"medium_{abs(hash(entry.link)) % 10000}",
-                        "title": title,
-                        "platform": "Medium",
-                        "type": "Article",
-                        "link": entry.link,
-                        "icon": "fab fa-medium",
-                        "date": published.strftime("%Y-%m-%d"),
-                        "claps": claps,  # Use claps instead of views
-                        "source": "medium",
-                        "description": description,
-                        "language": "en"  # Medium is English
-                    }
-                    articles.append(article)
-                    print(f"   📄 {title} ({claps} claps)" if claps else f"   📄 {title}")
-                    
-                except Exception as e:
-                    print(f"   ⚠️  Skipping entry due to error: {e}")
-                    continue
-            
-            print(f"✅ Successfully fetched {len(articles)} Medium articles")
+            print(f"Found {len(items)} entries in feed")
             return articles
             
         except Exception as e:
             print(f"❌ Error fetching Medium RSS: {e}")
-            print(f"   URL: {url}")
             return []
     
     def get_medium_claps(self, article_url: str) -> str | None:
@@ -685,369 +658,49 @@ class ContentFetcher:
         print("📡 Fetching Spotify podcast episodes")
         
         try:
+            spotify_app_id = os.environ['SPOTIFY_APP_ID']
+            spotify_app_secret = os.environ['SPOTIFY_APP_SECRET']
+
+            auth_response = requests.post(
+                "https://accounts.spotify.com/api/token", 
+                data={
+                    "grant_type": "client_credentials"
+                }, auth=(spotify_app_id, spotify_app_secret))
+            token = auth_response.json()["access_token"]
+
             all_episodes = []
             podcasts = source_config.get('podcasts', [])
             
             for podcast in podcasts:
                 podcast_name = podcast.get('name', '')
-                podcast_url = podcast.get('url', '')
-                podcast_language = podcast.get('language', 'en')
-                
                 print(f"   🎧 Processing podcast: {podcast_name}")
+                podcast_language = podcast.get('language', 'en')
+                podcast_episodes = requests.get(
+                    "https://api.spotify.com/v1/shows/6tdxOe9J5qjykTLRvB6blL/episodes?limit=50",
+                    headers={"Authorization": f"Bearer {token}"}
+                ).json().get("items", [])
+                for i, episode in enumerate(podcast_episodes):
+                    all_episodes.append({
+                        "id": f"spotify_{podcast_name}_{i}",
+                        "title": episode["name"],
+                        "link": episode["external_urls"]["spotify"],
+                        "date": datetime.strptime(episode["release_date"], "%Y-%m-%d").strftime("%b %d, %Y"),
+                        "description": episode["description"],
+                        "platform": "Spotify",
+                        "type": "Podcast",
+                        "icon": "fab fa-spotify",
+                        "views": None,
+                        "source": "spotify",
+                        "show_name": podcast_name,
+                        "language": podcast_language,
+                    })
                 
-                if not podcast_url:
-                    print(f"   ❌ No URL provided for {podcast_name}")
-                    continue
-                
-                # Extract show ID from Spotify URL (supports both open.spotify.com and creators.spotify.com)
-                show_id = None
-                if 'open.spotify.com/show/' in podcast_url:
-                    show_id = podcast_url.split('/show/')[-1].split('?')[0]
-                elif 'creators.spotify.com/pod/profile/' in podcast_url:
-                    show_id = podcast_url.split('/pod/profile/')[-1].rstrip('/')
-                
-                if not show_id:
-                    print(f"   ❌ Could not extract show ID from URL: {podcast_url}")
-                    continue
-                
-                # Try to get episode data using Spotify Web API or web scraping
-                episodes = self.get_spotify_show_episodes(show_id, podcast_name, podcast_language, max_episodes=5)
-                all_episodes.extend(episodes)
-                
-                print(f"   ✅ Fetched {len(episodes)} episodes from {podcast_name}")
-                
-                # Rate limiting
-                time.sleep(1)
             
             print(f"✅ Successfully fetched {len(all_episodes)} Spotify episodes")
             return all_episodes
             
         except Exception as e:
             print(f"❌ Error fetching Spotify episodes: {e}")
-            return []
-    
-    def get_spotify_show_episodes(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> list[dict]:
-        """Get episodes from a Spotify show using Spotify Web API"""
-        try:
-            # Try to use Spotify Web API first (more reliable)
-            episodes = self.get_spotify_episodes_via_api(show_id, show_name, language, max_episodes)
-            if episodes:
-                return episodes
-            
-            # Fallback to web scraping if API doesn't work
-            print(f"   🔄 API failed, trying web scraping...")
-            return self.get_spotify_episodes_via_scraping(show_id, show_name, language, max_episodes)
-            
-        except Exception as e:
-            print(f"   ❌ Error getting episodes for show {show_id}: {e}")
-            return []
-    
-    def get_spotify_episodes_via_api(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> list[dict]:
-        """Get episodes using Spotify creators page (much better for scraping)"""
-        try:
-            # Use the creators.spotify.com URL which is much better for scraping
-            creators_url = f"https://creators.spotify.com/pod/profile/{show_id}/"
-            headers = {
-                'User-Agent': user_agent,
-                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-                'Accept-Language': 'en-US,en;q=0.5',
-                'Accept-Encoding': 'gzip, deflate',
-                'Connection': 'keep-alive',
-            }
-            
-            response = requests.get(creators_url, headers=headers, timeout=10, verify=ssl_verify)
-            if response.status_code == 200:
-                # Parse the creators page to extract episode information
-                soup = BeautifulSoup(response.content, 'html.parser')
-                
-                episodes = []
-                
-                # Look specifically for the episodeFeed div which contains all episodes
-                episode_feed = soup.find('div', attrs={'data-cy': 'episodeFeed'})
-                
-                if episode_feed:
-                    print(f"   🎯 Found episodeFeed div, extracting episodes...")
-                    
-                    # Find all episode links within the episodeFeed
-                    episode_links = episode_feed.find_all('a', href=True)
-                    
-                    if episode_links:
-                        print(f"   🔄 Found {len(episode_links)} episode links in episodeFeed, extracting...")
-                        
-                        for i, link_elem in enumerate(episode_links[:max_episodes]):
-                            try:
-                                # Extract title from the episodeFeedTitle - try multiple selectors
-                                title_elem = (link_elem.find('div', attrs={'data-cy': 'episodeFeedTitle'}) or 
-                                            link_elem.find('h4') or 
-                                            link_elem.find('div', class_=re.compile(r'dYAFeC')))
-                                
-                                if not title_elem:
-                                    continue
-                                
-                                title = title_elem.get_text().strip()
-                                if not title or len(title) < 5:
-                                    continue
-                                
-                                # Extract description from the episode content - try multiple selectors
-                                desc_elem = (link_elem.find('span', class_=re.compile(r'sc-kLWOiw|sc-ieSnRl')) or
-                                           link_elem.find('span', class_=re.compile(r'fCcxuM|fXlJJi')) or
-                                           link_elem.find('div', class_=re.compile(r'gLytag')))
-                                
-                                description = ""
-                                if desc_elem:
-                                    desc_text = desc_elem.get_text().strip()
-                                    if desc_text and len(desc_text) > 10:
-                                        description = desc_text[:120] + "..." if len(desc_text) > 120 else desc_text
-                                
-                                # Extract date from the episode metadata - try multiple selectors
-                                # Look for date elements with more specific patterns
-                                date_elem = None
-                                
-                                # Try to find date in various locations within the episode link
-                                date_selectors = [
-                                    'span[class*="date"]',
-                                    'span[class*="time"]', 
-                                    'span[class*="published"]',
-                                    'time',
-                                    'div[class*="date"]',
-                                    'div[class*="time"]',
-                                    'div[class*="published"]'
-                                ]
-                                
-                                for selector in date_selectors:
-                                    date_elem = link_elem.select_one(selector)
-                                    if date_elem:
-                                        break
-                                
-                                # Also try to find any text that looks like a date pattern
-                                if not date_elem:
-                                    all_spans = link_elem.find_all('span')
-                                    for span in all_spans:
-                                        span_text = span.get_text().strip()
-                                        # Look for date patterns like "2024", "Jan", "2024-01", etc.
-                                        if (re.search(r'\b(20\d{2}|19\d{2})\b', span_text) or 
-                                            re.search(r'\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b', span_text, re.IGNORECASE) or
-                                            re.search(r'\b\d{1,2}[/-]\d{1,2}[/-]\d{2,4}\b', span_text)):
-                                            date_elem = span
-                                            break
-                                
-                                date = "Unknown"
-                                if date_elem:
-                                    date_text = date_elem.get_text().strip()
-                                    if date_text and len(date_text) > 2:
-                                        # Clean up the date text
-                                        date_text = re.sub(r'\s+', ' ', date_text).strip()
-                                        date = date_text
-                                        print(f"      📅 Found date: {date}")
-                                    else:
-                                        print(f"      ⚠️  Date text too short: '{date_text}'")
-                                else:
-                                    print(f"      ⚠️  No date element found for episode: {title}")
-                                
-                                # Extract link
-                                href = link_elem.get('href')
-                                if href and href.startswith('/'):
-                                    link = f"https://creators.spotify.com{href}"
-                                elif href and href.startswith('http'):
-                                    link = href
-                                else:
-                                    link = f"https://creators.spotify.com/pod/profile/{show_id}/"
-                                
-                                episode = {
-                                    "id": f"spotify_{show_id}_{i}",
-                                    "title": title,
-                                    "platform": "Spotify",
-                                    "type": "Podcast",
-                                    "link": link,
-                                    "icon": "fab fa-spotify",
-                                    "date": date,
-                                    "views": None,  # No views for podcasts
-                                    "source": "spotify",
-                                    "description": description or f"Episode of {show_name}",
-                                    "show_name": show_name,
-                                    "language": language
-                                }
-                                
-                                episodes.append(episode)
-                                print(f"   🎧 {title}")
-                                
-                            except Exception as e:
-                                print(f"   ⚠️  Error processing episode element: {e}")
-                                continue
-                        
-                        if episodes:
-                            print(f"   ✅ Successfully extracted {len(episodes)} episodes from episodeFeed")
-                            return episodes
-                else:
-                    print(f"   ❌ No episodeFeed div found on the page")
-                
-                # If no episodes found, try to extract from any text that looks like episode titles
-                all_text_elements = soup.find_all(['h1', 'h2', 'h3', 'h4', 'h5', 'p'])
-                episode_titles = []
-                
-                for elem in all_text_elements:
-                    text = elem.get_text().strip()
-                    # Look for text that might be episode titles
-                    if (text and 
-                        len(text) > 10 and 
-                        len(text) < 100 and
-                        not text.lower().startswith('http') and
-                        not text.lower() in ['home', 'about', 'contact', 'privacy', 'terms'] and
-                        not text.isupper()):
-                        episode_titles.append(text)
-                
-                if episode_titles:
-                    print(f"   🔄 Found {len(episode_titles)} potential episode titles, creating episodes...")
-                    
-                    for i, title in enumerate(episode_titles[:max_episodes]):
-                        episode = {
-                            "id": f"spotify_{show_id}_{i}",
-                            "title": title,
-                            "platform": "Spotify",
-                            "type": "Podcast",
-                            "link": f"https://creators.spotify.com/pod/profile/{show_id}/",
-                            "icon": "fab fa-spotify",
-                            "date": datetime.now().strftime("%Y-%m-%d"),
-                            "views": None,
-                            "source": "spotify",
-                            "description": f"Episode of {show_name}",
-                            "show_name": show_name,
-                            "language": language
-                        }
-                        
-                        episodes.append(episode)
-                        print(f"   🎧 {title}")
-                    
-                    if episodes:
-                        return episodes
-            
-            # If all methods failed, create minimal placeholder
-            print(f"   📝 Could not extract episodes from creators page for {show_name}")
-            return []
-            
-        except Exception as e:
-            print(f"   ⚠️  Spotify creators method failed: {e}")
-            return []
-    
-    def get_spotify_episodes_via_scraping(self, show_id: str, show_name: str, language: str, max_episodes: int = 5) -> list[dict]:
-        """Get episodes from a Spotify show using web scraping (fallback method)"""
-        try:
-            # Use web scraping to get real episode data from Spotify
-            show_url = f"https://open.spotify.com/show/{show_id}"
-            headers = {
-                'User-Agent': user_agent
-            }
-            
-            response = requests.get(show_url, headers=headers, timeout=10, verify=ssl_verify)
-            response.raise_for_status()
-            
-            # Parse HTML content
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            episodes = []
-            
-            # Look for episode elements using the specific data-testid pattern I found
-            episode_elements = soup.find_all('div', attrs={'data-testid': lambda x: x and x.startswith('episode-')})
-            
-            if not episode_elements:
-                # Fallback: try to find any episode-like elements
-                episode_elements = soup.find_all(['div', 'span'], class_=re.compile(r'episode|track'))
-            
-            for i, episode_elem in enumerate(episode_elements[:max_episodes]):
-                try:
-                    # Extract episode title - try multiple approaches
-                    title = ""
-                    
-                    # Method 1: Look for data-testid="episodeTitle"
-                    title_elem = episode_elem.find('h4', attrs={'data-testid': 'episodeTitle'})
-                    if title_elem:
-                        title = title_elem.get_text().strip()
-                    
-                    # Method 2: Look for title in aria-label
-                    if not title:
-                        play_button = episode_elem.find('button', attrs={'data-testid': 'play-button'})
-                        if play_button and play_button.get('aria-label'):
-                            aria_label = play_button.get('aria-label')
-                            # Extract title from aria-label like "Play פרק 20: החלבון ושיברו by המחוללים"
-                            if 'by' in aria_label:
-                                title = aria_label.split('by')[0].replace('Play ', '').strip()
-                            else:
-                                title = aria_label.replace('Play ', '').strip()
-                    
-                    # Method 3: Fallback to generic title search
-                    if not title:
-                        title_elem = episode_elem.find(['h3', 'h4', 'span'], class_=re.compile(r'title|name'))
-                        if title_elem:
-                            title = title_elem.get_text().strip()
-                    
-                    if not title or len(title) < 5:
-                        continue
-                    
-                    # Extract description - look for the specific class I found
-                    description = ""
-                    desc_elem = episode_elem.find('p', attrs={'class': lambda x: x and 'asAGCceDzqi7tElU3KDh' in x})
-                    if desc_elem:
-                        description = desc_elem.get_text().strip()
-                    else:
-                        # Fallback: look for any description-like element
-                        desc_elem = episode_elem.find(['p', 'span'], class_=re.compile(r'description|summary'))
-                        if desc_elem:
-                            description = desc_elem.get_text().strip()
-                    
-                    # Extract date - look for the specific class I found
-                    date_str = ""
-                    date_elem = episode_elem.find('p', attrs={'class': lambda x: x and '_q93agegdE655O5zPz6l' in x})
-                    if date_str:
-                        date_str = date_elem.get_text().strip()
-                    
-                    # Parse date
-                    try:
-                        if date_str and ',' in date_str:
-                            # Handle formats like "Oct 25, 2024", "Sep 24, 2024"
-                            parsed_date = datetime.strptime(date_str, "%b %d, %Y")
-                            date = parsed_date.strftime("%Y-%m-%d")
-                        else:
-                            date = datetime.now().strftime("%Y-%m-%d")
-                    except ValueError:
-                        date = datetime.now().strftime("%Y-%m-%d")
-                    
-                    # Extract episode link if available
-                    link_elem = episode_elem.find('a')
-                    episode_link = show_url
-                    if link_elem and link_elem.get('href'):
-                        episode_link = f"https://open.spotify.com{link_elem.get('href')}"
-                    
-                    # Create episode object
-                    episode = {
-                        "id": f"spotify_{show_id}_{i}",
-                        "title": title,
-                        "platform": "Spotify",
-                        "type": "Podcast",
-                        "link": episode_link,
-                        "icon": "fab fa-spotify",
-                        "date": date,
-                        "views": None,  # Spotify doesn't show view counts publicly
-                        "source": "spotify",
-                        "description": description[:120] + "..." if len(description) > 120 else description,
-                        "show_name": show_name,
-                        "language": language
-                    }
-                    episodes.append(episode)
-                    print(f"   🎧 {title}")
-                    
-                except Exception as e:
-                    print(f"   ⚠️  Error processing episode {i}: {e}")
-                    continue
-            
-            # If web scraping didn't work, return empty list instead of mock data
-            if not episodes:
-                print(f"   ⚠️  No episodes found via web scraping for {show_name}")
-                return []
-            
-            return episodes
-            
-        except Exception as e:
-            print(f"   ❌ Error getting episodes for show {show_id}: {e}")
             return []
     
     def fetch_youtube_videos(self, channel_info: dict) -> list[dict]:
@@ -1402,7 +1055,7 @@ class ContentFetcher:
             
             try:
                 if source["type"] == "rss" and source["id"] == "medium":
-                    content = self.fetch_medium_rss(source["url"])
+                    content = self.fetch_medium_rss(source["username"])
                 elif source["id"] == "youtube":
                     content = self.fetch_youtube_videos(source)
                 elif source["id"] == "spotify":
