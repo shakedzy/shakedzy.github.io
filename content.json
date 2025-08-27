@@ -61,7 +61,18 @@
     "max_display": 6
   },
 
-  "manual_talks": [],
+  "manual_talks": [
+    {
+      "title": "Taking a GenAI Project to Production", 
+      "platform": "JFrog Blog",
+      "type": "Article",
+      "date": "2024-06-10",
+      "link": "https://jfrog.com/blog/taking-a-genai-project-to-production/",
+      "description": "Generative AI and Large Language Models (LLMs) are the new revolution of Artificial Intelligence, bringing the world capabilities that we could only dream about less than two years ago. Unlike...",
+      "views": null,
+      "icon": "fa-solid fa-blog"
+    }
+  ],
   "manual_podcast_guests": [],
 
   "content_sources": {
@@ -88,24 +99,9 @@
         }
       ]
     },
-    "blogs": [
-      {
-        "name": "JFrog Blog",
-        "url": "https://jfrog.com/blog-author/shaked-zychlinski/",
-        "enabled": true,
-        "type": "scrape",
-        "language": "en",
-        "xpath": "//div[contains(@class, 'latest-posts-from-blog-author')]"
-      }
-    ]
+    "blogs": []
   },
   "cssp": [
-    {
-      "name": "Breathing Timer",
-      "description": "A simple breathing timer web app", 
-      "icon": "https://raw.githubusercontent.com/shakedzy/breathing-timer/refs/heads/main/favicon.png",
-      "link": "https://shakedzy.xyz/breathing-timer/"
-    },
     {
       "name": "Jump Up",
       "description": "🎮 Web-based kids-friendly multiplayer game based on Chrome's Dino", 
@@ -117,6 +113,12 @@
       "description": "Help Yuval avoid the money! 💵💰", 
       "icon": "https://raw.githubusercontent.com/shakedzy/bad-luck-yuval/refs/heads/main/the-yuval.png",
       "link": "http://shakedzy.xyz/bad-luck-yuval/"
+    },
+    {
+      "name": "Breathing Timer",
+      "description": "A simple breathing timer web app", 
+      "icon": "https://raw.githubusercontent.com/shakedzy/breathing-timer/refs/heads/main/favicon.png",
+      "link": "https://shakedzy.xyz/breathing-timer/"
     }
   ]
 }

@@ -25,6 +25,12 @@ class ContentFetcher:
         self.base_path = base_path
         self.data_path = os.path.join(base_path, "data")
         self.sources_config = self.load_sources_config()
+
+    def load_manual_talks(self) -> list:
+        """Load manually curated talks from talks.json"""
+        with open(os.path.join(self.base_path, "content.json"), 'r') as f:
+            data = json.load(f)
+            return data.get("manual_talks", [])
         
     def load_sources_config(self) -> dict:
         """Load content sources configuration from content.json"""
@@ -130,7 +136,7 @@ class ContentFetcher:
                     "link": link,
                     "icon": "fab fa-medium",
                     "date": datetime.strptime(date, "%Y-%m-%d %H:%M:%S").strftime("%b %d, %Y"),
-                    "claps": None,
+                    "claps": self.get_medium_claps(link),
                     "source": "medium",
                     "description": snippet,
                     "language": "en"  
@@ -190,468 +196,6 @@ class ContentFetcher:
         else:
             return str(claps)
     
-    def fetch_jfrog_blog(self, url: str, xpath: str = None) -> list[dict]:
-        """Fetch articles from JFrog blog author page"""
-        print(f"📡 Fetching JFrog blog: {url}")
-        
-        try:
-            headers = {
-                'User-Agent': user_agent
-            }
-            response = requests.get(url, headers=headers, timeout=10, verify=ssl_verify)
-            response.raise_for_status()
-            
-            # Parse HTML content
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            articles = []
-            
-            # If XPath is provided, use it to find the specific section
-            if xpath:
-                print(f"   🎯 Using XPath selector: {xpath}")
-                target_section = None
-                
-                # Convert XPath to CSS selector approximation for BeautifulSoup
-                if "latest-posts-from-blog-author" in xpath:
-                    target_section = soup.find('div', class_='latest-posts-from-blog-author')
-                    print(f"   🔍 Looking for div with class 'latest-posts-from-blog-author'")
-                    if target_section:
-                        print(f"   ✅ Found latest-posts-from-blog-author div")
-                    else:
-                        print(f"   ❌ latest-posts-from-blog-author div not found")
-                elif "site-content" in xpath:
-                    # For Taboola: //*[@id='site-content']/section[2]/div/div/div/div
-                    site_content = soup.find('div', id='site-content')
-                    if site_content:
-                        print(f"   🔍 Found site-content div, looking for section[2]")
-                        sections = site_content.find_all('section')
-                        if len(sections) >= 2:
-                            target_section = sections[1]  # section[2] is index 1
-                            print(f"   ✅ Found section[2], now looking for div/div/div/div")
-                            # Navigate through the div hierarchy more carefully
-                            current = target_section
-                            for i in range(4):  # div/div/div/div
-                                divs = current.find_all('div', recursive=False)
-                                if divs:
-                                    # Try to find the right div - look for one with content
-                                    best_div = divs[0]  # Default to first
-                                    for div in divs:
-                                        # Check if this div has meaningful content
-                                        if div.find_all('a', href=True):
-                                            best_div = div
-                                            break
-                                    current = best_div
-                                    print(f"      Level {i+1}: Found {len(divs)} divs, selected one with {len(current.find_all('a', href=True))} links")
-                                else:
-                                    print(f"      Level {i+1}: No divs found")
-                                    break
-                            target_section = current
-                        else:
-                            print(f"   ⚠️  Only found {len(sections)} sections, need at least 2")
-                            # Fallback: try to find any section with content
-                            print(f"   🔄 Fallback: looking for any section with content")
-                            for section in sections:
-                                if section.find_all('a', href=True):
-                                    target_section = section
-                                    print(f"   ✅ Found section with {len(target_section.find_all('a', href=True))} links")
-                                    break
-                    else:
-                        print(f"   ❌ site-content div not found")
-                        # Fallback: try to find any div with id containing 'content'
-                        print(f"   🔄 Fallback: looking for any content div")
-                        content_divs = soup.find_all('div', id=re.compile(r'content'))
-                        if content_divs:
-                            target_section = content_divs[0]
-                            print(f"   ✅ Found content div with {len(target_section.find_all('a', href=True))} links")
-                else:
-                    print(f"   ⚠️  Unknown XPath pattern: {xpath}")
-                
-                if target_section:
-                    print(f"   🎯 Target section found, extracting links...")
-                    blog_links = target_section.find_all('a', href=True)
-                    print(f"   🔍 Found {len(blog_links)} links in target section")
-                    
-                    # If no links found in target section, allow fallback for Taboola
-                    if len(blog_links) == 0 and "site-content" in xpath:
-                        print(f"   🔄 Target section is empty, allowing fallback to entire page for Taboola")
-                        blog_links = soup.find_all('a', href=True)
-                        print(f"   🔍 Fallback found {len(blog_links)} links in entire page")
-                else:
-                    print(f"   ❌ Target section not found, XPath targeting failed")
-                    # For Taboola, allow fallback to entire page to get content back
-                    if "site-content" in xpath:
-                        print(f"   🔄 Allowing fallback to entire page for Taboola")
-                        blog_links = soup.find_all('a', href=True)
-                    else:
-                        print(f"   📝 Will NOT search entire page - respecting XPath boundaries")
-                        blog_links = []  # Empty list to force no results
-            else:
-                # Look for ONLY actual blog post links - be very selective
-                blog_links = soup.find_all('a', href=True)
-            
-            found_articles = set()  # Track found articles to avoid duplicates
-            
-            # Process ONLY blog post links with very strict filtering
-            for link in blog_links[:50]:  # Check more links to find actual posts
-                href = str(link.get('href', ''))
-                title = link.get_text().strip()
-                
-                # VERY STRICT filtering - only actual blog posts
-                if (href and 
-                    title and 
-                    len(title) > 20 and  # Longer titles are more likely to be articles
-                    len(title) < 200 and  # But not too long
-                    '/blog/' in href and  # Must contain /blog/ in URL
-                    not title.lower().startswith('http') and
-                    not title.lower().startswith('www') and
-                    title.lower() not in ['read more', 'continue reading', 'blog', 'home', 'about', 'back to blog', 'engineering blog', 'community', 'documentation', 'integrations', 'applications'] and
-                    not href.startswith('#') and
-                    not href.startswith('mailto:') and
-                    not href.startswith('tel:') and
-                    not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination'])):
-                    
-                    # Get full URL
-                    if href.startswith('/'):
-                        full_url = f"https://jfrog.com{href}"
-                    elif href.startswith('http'):
-                        full_url = href
-                    else:
-                        full_url = f"https://jfrog.com/{href}"
-                    
-                    # Skip if we already found this article
-                    if full_url in found_articles:
-                        continue
-                    
-                    # Additional validation - check if the URL looks like a blog post
-                    if not any(post_indicator in full_url.lower() for post_indicator in ['/blog/', '/post/', '/article/', '/news/', '/insights/']):
-                        continue
-                    
-                    found_articles.add(full_url)
-                    
-                    # Try to get article metadata
-                    article_data = self.get_jfrog_article_metadata(full_url)
-                    
-                    article = {
-                        "id": f"jfrog_{abs(hash(full_url)) % 10000}",
-                        "title": title,
-                        "platform": "JFrog",
-                        "type": "Technical Article",
-                        "link": full_url,
-                        "icon": "fas fa-blog",
-                        "date": article_data.get('date', 'Unknown'),
-                        "views": article_data.get('views'),
-                        "source": "jfrog",
-                        "description": article_data.get('description', ''),
-                        "language": "en"
-                    }
-                    articles.append(article)
-                    print(f"   📄 {title}")
-            
-            # If XPath was provided, ONLY use content from the target section - no fallback to entire page
-            if xpath and len(articles) < 3:
-                print(f"   ⚠️  Only found {len(articles)} articles in XPath section '{xpath}' - respecting boundaries")
-                print(f"   📝 XPath targeting is working - only extracting from specified section")
-            elif not xpath and len(articles) < 3:
-                print(f"   🔍 Only found {len(articles)} articles, looking for more blog-like content...")
-                for link in blog_links[:100]:
-                    href = str(link.get('href', ''))
-                    title = link.get_text().strip()
-                    
-                    # Look for any remaining content that might be blog posts
-                    if (href and 
-                        title and 
-                        len(title) > 25 and  # Even longer titles
-                        len(title) < 150 and
-                        not title.lower().startswith('http') and
-                        not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination', 'community', 'documentation', 'integrations', 'applications', 'resources', 'partners', 'about', 'contact', 'privacy', 'terms', 'cookies', 'sitemap']) and
-                        not href.startswith('#') and
-                        not href.startswith('mailto:') and
-                        not href.startswith('tel:')):
-                        
-                        # Get full URL
-                        if href.startswith('/'):
-                            full_url = f"https://jfrog.com{href}"
-                        elif href.startswith('http'):
-                            full_url = href
-                        else:
-                            full_url = f"https://jfrog.com/{href}"
-                        
-                        # Skip if we already found this article
-                        if full_url in found_articles:
-                            continue
-                        
-                        found_articles.add(full_url)
-                        
-                        # Try to get article metadata
-                        article_data = self.get_jfrog_article_metadata(full_url)
-                        
-                        article = {
-                            "id": f"jfrog_{abs(hash(full_url)) % 10000}",
-                            "title": title,
-                            "platform": "JFrog",
-                            "type": "Technical Article",
-                            "link": full_url,
-                            "icon": "fas fa-blog",
-                            "date": article_data.get('date', 'Unknown'),
-                            "views": article_data.get('views'),
-                            "source": "jfrog",
-                            "description": article_data.get('description', ''),
-                            "language": "en"
-                        }
-                        articles.append(article)
-                        print(f"   📄 {title}")
-                        
-                        if len(articles) >= 5:  # Limit to 5 articles max
-                            break
-            
-            print(f"✅ Fetched {len(articles)} JFrog articles")
-            return articles
-            
-        except Exception as e:
-            print(f"❌ Error fetching JFrog blog: {e}")
-            return []
-    
-    def get_jfrog_article_metadata(self, article_url: str) -> dict:
-        """Get metadata from JFrog article page"""
-        try:
-            headers = {
-                'User-Agent': user_agent
-            }
-            response = requests.get(article_url, headers=headers, timeout=10)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Extract description
-            description = ""
-            meta_desc = soup.find('meta', attrs={'name': 'description'})
-            if meta_desc and meta_desc.get('content'):
-                content = str(meta_desc.get('content', ''))
-                if len(content) > 120:
-                    description = content[:120] + "..."
-                else:
-                    description = content
-            
-            # Extract date
-            date = "Unknown"
-            date_elem = soup.find('time') or soup.find(class_=re.compile(r'date|published|time'))
-            if date_elem:
-                date_text = date_elem.get_text().strip()
-                if date_text:
-                    date = date_text
-            
-            return {
-                'description': description,
-                'date': date,
-                'views': None  # JFrog doesn't typically show view counts
-            }
-            
-        except Exception as e:
-            print(f"   ⚠️  Could not fetch metadata for {article_url}: {e}")
-            return {'description': '', 'date': 'Unknown', 'views': None}
-    
-    def fetch_taboola_blog(self, url: str, xpath: str = None) -> list[dict]:
-        """Fetch articles from Taboola blog author page"""
-        print(f"📡 Fetching Taboola blog: {url}")
-        
-        try:
-            headers = {
-                'User-Agent': user_agent
-            }
-            response = requests.get(url, headers=headers, timeout=10, verify=ssl_verify)
-            response.raise_for_status()
-            
-            # Parse HTML content
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            articles = []
-            
-            # If XPath is provided, use it to find the specific section
-            if xpath:
-                print(f"   🎯 Using XPath selector: {xpath}")
-                # Convert XPath to CSS selector approximation for BeautifulSoup
-                if "site-content" in xpath:
-                    target_section = soup.find('div', id='site-content')
-                    if target_section:
-                        # Navigate to section[2]/div/div/div/div
-                        sections = target_section.find_all('section')
-                        if len(sections) >= 2:
-                            target_section = sections[1]  # section[2] is index 1
-                        else:
-                            target_section = soup
-                else:
-                    # Fallback to searching the entire page
-                    target_section = soup
-                
-                if target_section:
-                    blog_links = target_section.find_all('a', href=True)
-                    print(f"   🔍 Found {len(blog_links)} links in target section")
-                else:
-                    print(f"   ⚠️  Target section not found, searching entire page")
-                    blog_links = soup.find_all('a', href=True)
-            else:
-                # Look for blog post links - adjust selectors based on Taboola's actual HTML structure
-                blog_links = soup.find_all('a', href=True)
-            
-            # Also look for article/post elements
-            post_elements = soup.find_all(['article', 'div'], class_=re.compile(r'post|article|entry|blog'))
-            
-            found_articles = set()  # Track found articles to avoid duplicates
-            
-            # Process ONLY actual blog post links with very strict filtering
-            for link in blog_links[:50]:  # Check more links to find actual posts
-                href = str(link.get('href', ''))
-                title = link.get_text().strip()
-                
-                # VERY STRICT filtering - only actual blog posts
-                if (href and 
-                    title and 
-                    len(title) > 20 and  # Longer titles are more likely to be articles
-                    len(title) < 200 and  # But not too long
-                    any(path in href for path in ['/blog/', '/post/', '/article/', '/engineering/']) and  # Must contain blog-related paths
-                    not title.lower().startswith('http') and
-                    not title.lower().startswith('www') and
-                    title.lower() not in ['read more', 'continue reading', 'blog', 'home', 'about', 'engineering blog', 'community', 'documentation', 'integrations', 'applications', 'resources', 'partners', 'social responsibility', 'glossary', 'quickstart', 'webinars', 'trends', 'marketing'] and
-                    not href.startswith('#') and
-                    not href.startswith('mailto:') and
-                    not href.startswith('tel:') and
-                    not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination'])):
-                    
-                    # Get full URL
-                    if href.startswith('/'):
-                        full_url = f"https://www.taboola.com{href}"
-                    elif href.startswith('http'):
-                        full_url = href
-                    else:
-                        full_url = f"https://www.taboola.com/{href}"
-                    
-                    # Skip if we already found this article
-                    if full_url in found_articles:
-                        continue
-                    
-                    # Additional validation - check if the URL looks like a blog post
-                    if not any(post_indicator in full_url.lower() for post_indicator in ['/blog/', '/post/', '/article/', '/news/', '/insights/', '/engineering/']):
-                        continue
-                    
-                    found_articles.add(full_url)
-                    
-                    # Try to get article metadata
-                    article_data = self.get_taboola_article_metadata(full_url)
-                    
-                    article = {
-                        "id": f"taboola_{abs(hash(full_url)) % 10000}",
-                        "title": title,
-                        "platform": "Taboola",
-                        "type": "Engineering Article",
-                        "link": full_url,
-                        "icon": "fas fa-code",
-                        "date": article_data.get('date', 'Unknown'),
-                        "views": article_data.get('views'),
-                        "source": "taboola",
-                        "description": article_data.get('description', ''),
-                        "language": "en"
-                    }
-                    articles.append(article)
-                    print(f"   📄 {title}")
-            
-            # If XPath was provided, ONLY use content from the target section - no fallback to entire page
-            if xpath and len(articles) < 3:
-                print(f"   ⚠️  Only found {len(articles)} articles in XPath section '{xpath}' - respecting boundaries")
-                print(f"   📝 XPath targeting is working - only extracting from specified section")
-            elif not xpath and len(articles) < 3:
-                print(f"   🔍 Only found {len(articles)} articles, looking for more blog-like content...")
-                for link in blog_links[:100]:
-                    href = str(link.get('href', ''))
-                    title = link.get_text().strip()
-                    
-                    # Look for any remaining content that might be blog posts
-                    if (href and 
-                        title and 
-                        len(title) > 25 and  # Even longer titles
-                        len(title) < 150 and
-                        not title.lower().startswith('http') and
-                        not any(nav in title.lower() for nav in ['menu', 'navigation', 'footer', 'header', 'sidebar', 'breadcrumb', 'pagination', 'community', 'documentation', 'integrations', 'applications', 'resources', 'partners', 'about', 'contact', 'privacy', 'terms', 'cookies', 'sitemap', 'social responsibility', 'glossary', 'quickstart', 'webinars', 'trends', 'marketing']) and
-                        not href.startswith('#') and
-                        not href.startswith('mailto:') and
-                        not href.startswith('tel:')):
-                        
-                        # Get full URL
-                        if href.startswith('/'):
-                            full_url = f"https://www.taboola.com{href}"
-                        elif href.startswith('http'):
-                            full_url = href
-                        else:
-                            full_url = f"https://www.taboola.com/{href}"
-                        
-                        found_articles.add(full_url)
-                        
-                        # Try to get article metadata
-                        article_data = self.get_taboola_article_metadata(full_url)
-                        
-                        article = {
-                            "id": f"taboola_{abs(hash(full_url)) % 10000}",
-                            "title": title,
-                            "platform": "Taboola",
-                            "type": "Engineering Article",
-                            "link": full_url,
-                            "icon": "fas fa-code",
-                            "date": article_data.get('date', 'Unknown'),
-                            "views": article_data.get('views'),
-                            "source": "taboola",
-                            "description": article_data.get('description', ''),
-                            "language": "en"
-                        }
-                        articles.append(article)
-                        print(f"   📄 {title}")
-                        
-                        if len(articles) >= 5:  # Limit to 5 articles max
-                            break
-            
-            print(f"✅ Fetched {len(articles)} Taboola articles")
-            return articles
-            
-        except Exception as e:
-            print(f"❌ Error fetching Taboola blog: {e}")
-            return []
-    
-    def get_taboola_article_metadata(self, article_url: str) -> dict:
-        """Get metadata from Taboola article page"""
-        try:
-            headers = {
-                'User-Agent': user_agent
-            }
-            response = requests.get(article_url, headers=headers, timeout=10)
-            response.raise_for_status()
-            
-            soup = BeautifulSoup(response.content, 'html.parser')
-            
-            # Extract description
-            description = ""
-            meta_desc = soup.find('meta', attrs={'name': 'description'})
-            if meta_desc and meta_desc.get('content'):
-                content = str(meta_desc.get('content', ''))
-                if len(content) > 120:
-                    description = content[:120] + "..."
-                else:
-                    description = content
-            
-            # Extract date
-            date = "Unknown"
-            date_elem = soup.find('time') or soup.find(class_=re.compile(r'date|published|time'))
-            if date_elem:
-                date_text = date_elem.get_text().strip()
-                if date_text:
-                    date = date_text
-            
-            return {
-                'description': description,
-                'date': date,
-                'views': None  # Taboola doesn't typically show view counts
-            }
-            
-        except Exception as e:
-            print(f"   ⚠️  Could not fetch metadata for {article_url}: {e}")
-            return {'description': '', 'date': 'Unknown', 'views': None}
     
     def fetch_spotify_episodes(self, source_config: dict) -> list[dict]:
         """Fetch episodes from Spotify podcasts"""
@@ -767,20 +311,15 @@ class ContentFetcher:
             url = f"https://api.github.com/users/{username}/repos"
             headers = {
                 'User-Agent': 'Personal-Website-Content-Fetcher/1.0',
-                'Accept': 'application/vnd.github.v3+json'
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': f'Bearer {os.environ["GH_TOKEN"]}'
             }
-            
-            # Add GitHub token if available for higher rate limits
-            GH_TOKEN = os.getenv('GH_TOKEN')
-            if GH_TOKEN:
-                headers['Authorization'] = f'token {GH_TOKEN}'
-                print("   🔑 Using GitHub token for authentication")
             
             # Fetch all repositories (GitHub paginates at 30 per page)
             all_repos = []
+            
             page = 1
             per_page = 100
-            
             while True:
                 params = {
                     'per_page': per_page,
@@ -819,10 +358,6 @@ class ContentFetcher:
                 if repo.get('private'):
                     continue
                 
-                # Skip repos with no description
-                if not repo.get('description'):
-                    continue
-                    
                 # Format repository data
                 formatted_repo = {
                     "id": f"github_{repo['id']}",
@@ -1092,13 +627,9 @@ class ContentFetcher:
             print(f"\n🔄 Processing {blog_source['name']}...")
             
             try:
-                if "jfrog" in blog_source["name"].lower():
-                    xpath = blog_source.get("xpath")
-                    print(f"   🔍 JFrog XPath: {xpath}")
-                    content = self.fetch_jfrog_blog(blog_source["url"], xpath)
-                else:
-                    print(f"⚠️  Unknown blog source: {blog_source['name']}")
-                    continue
+                # Implement blog fetching logic here
+                print(f"⚠️  Unknown blog source: {blog_source['name']}")
+                continue
                 
                 # Add language tag to each content item
                 if blog_source.get("language"):
@@ -1125,6 +656,7 @@ class ContentFetcher:
         
         # Update auto-fetched content
         talks_data["auto_fetched"] = fetched_content
+        talks_data["manual_items"] = self.load_manual_talks()
         
         # Save updated data
         self.save_talks_data(talks_data)
