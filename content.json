@@ -23,8 +23,16 @@
 
   "publications": [
     {
+      "title": "A Whole New World: Creating a Parallel-Poisoned Web Only AI-Agents Can See",
+      "journal": "White-paper",
+      "year": "2025",
+      "link": "https://arxiv.org/abs/2509.00124",
+      "authors": ["Shaked Zychlinski"],
+      "my_author_position": 1      
+    },
+    {
       "title": "Visual Representation for Capturing Creator Theme in Brand-Creator Marketplace",
-      "journal": "RecSys '23: Proceedings of the 17th ACM Conference on Recommender Systems",
+      "journal": "ACM RecSys 23",
       "year": "2023",
       "link": "https://dl.acm.org/doi/10.1145/3604915.3610237",
       "authors": ["Sarel Duanis", "Keren Gaiger", "Ravid Cohen", "Shaked Zychlinski", "Asnat Greenstein-Messica"],
