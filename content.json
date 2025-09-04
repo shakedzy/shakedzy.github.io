@@ -71,6 +71,16 @@
 
   "manual_talks": [
     {
+      "title": "New Invisible Attack Creates Parallel Poisoned Web Only for AI Agents", 
+      "platform": "JFrog Blog",
+      "type": "Article",
+      "date": "2025-09-04",
+      "link": "https://jfrog.com/blog/parallel-poison-web-for-ai-agents/",
+      "description": "Latest application security research reveals new attack vectors on AI Agents which serves them completely different content on the...",
+      "views": null,
+      "icon": "fa-solid fa-blog"
+    },
+    {
       "title": "Taking a GenAI Project to Production", 
       "platform": "JFrog Blog",
       "type": "Article",
