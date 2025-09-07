@@ -1,7 +1,7 @@
 {
   "manual_items": [
     {
-      "title": "New Invisible Attack Creates Parallel Poisoned Web Only for AI Agents", 
+      "title": "New Invisible Attack Creates Parallel Poisoned Web Only for AI Agents",
       "platform": "JFrog Blog",
       "type": "Article",
       "date": "2025-09-04",
@@ -121,7 +121,7 @@
       "link": "https://shakedzy.medium.com/why-covid-19-vaccines-are-a-requiem-for-humanity-bb6cdbea9120?source=rss-43218078e688------2",
       "icon": "fab fa-medium",
       "date": "Jan 23, 2021",
-      "claps": null,
+      "claps": "116",
       "source": "medium",
       "description": "\n“We can’t be consumed by our petty differences anymore. We will be united in our common interests”\n…",
       "language": "en"
@@ -134,7 +134,7 @@
       "link": "https://medium.com/data-science/how-i-keep-up-with-the-latest-innovations-in-ai-and-ml-4036e162fceb?source=rss-43218078e688------2",
       "icon": "fab fa-medium",
       "date": "Dec 22, 2020",
-      "claps": null,
+      "claps": "261",
       "source": "medium",
       "description": "\nBreaking down my reading list of what’s new in the AI world\nImage by Free-Photos from PixabayThe fi…",
       "language": "en"
@@ -160,7 +160,7 @@
       "link": "https://www.youtube.com/watch?v=Ci53gWMwsi8",
       "icon": "fab fa-youtube",
       "date": "2024-03-25",
-      "views": "280",
+      "views": "286",
       "source": "youtube",
       "description": "As Large Language Models (LLMs) such as GPT and Llama become increasingly integrated into various sectors, including tec...",
       "playlist": "Talks [English]",
@@ -174,7 +174,7 @@
       "link": "https://www.youtube.com/watch?v=95K83plZmLE",
       "icon": "fab fa-youtube",
       "date": "2024-03-09",
-      "views": "837",
+      "views": "838",
       "source": "youtube",
       "description": "In this video I interview a panel of experts from Wix, JFrog and SDR-GPT.\nWe discuss what it takes to successfuly develo...",
       "playlist": "Talks [English]",
