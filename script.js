@@ -42,7 +42,7 @@ class ThemeManager {
         const avatar = document.querySelector('.avatar');
         if (!avatar) return;
 
-        const imageSrc = this.currentTheme === 'dark' ? 'almond_dark.png' : 'almond.png';
+        const imageSrc = this.currentTheme === 'dark' ? 'almond_head_dark.png' : 'almond_head.png';
         
         if (avatar.src !== window.location.origin + '/' + imageSrc) {
             avatar.src = imageSrc;
