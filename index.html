@@ -1,190 +1,133 @@
-<!DOCTYPE HTML>
-<!--
-	Phantom by HTML5 UP
-	html5up.net | @ajlkn
-	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
--->
-<html>
-	<head>
-        <meta name="author" content="Shaked Zychlinski">
-        <meta property="og:type" content="website">
-        <meta property="og:title" name="title" content="This Is Me">
-        <meta property="og:description" name="description" content="Hey there, welcome!">
-        <meta property="og:url" content="https://shakedzy.xyz">
-        <meta property="og:image:type" content="image/png">
-        <meta property="og:image:width" content="640">
-        <meta property="og:image:height" content="360">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="shakedzy.xyz - my personal website">
+    <title>shakedzy.xyz</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="shortcut icon" type="image/png" href="favicon.png">
+    <link rel="apple-touch-icon" href="favicon.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <main class="container">
+        <header class="header">
+            <div class="profile">
+                <div class="profile-image">
+                    <img src="almond.png" alt="Shaked" class="avatar">
+                </div>
+                <h1 class="name">shakedzy.xyz</h1>
+                <p class="title">🌍 Born and raised on Earth</p>
+            </div>
+        </header>
 
-        <meta property="og:image" content="https://shakedzy.xyz/images/social_banner.png">
-        <meta property="og:image:secure_url" content="https://shakedzy.xyz/images/social_banner.png" />
-        <meta name="twitter:image" content="https://shakedzy.xyz/images/social_banner.png">
+        <section class="about">
+            <!-- <h2>Hey there!</h2> -->
+            <p><b>Hey there!</b> So nice of you to stop by 😃 Here you can find some stuff I've been working on</p>
+        </section>
 
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:site" content="https://shakedzy.xyz">
-        <meta name="twitter:creator" content="@shakedzy">
-        <meta name="twitter:title" content="This Is Me">
-        <meta name="twitter:description" content="Hey there, welcome!">
+        <!-- <section class="publications">
+            <h2>Publications</h2>
+            <div class="publications-list" id="publications-list">
+                <div class="publication">
+                    <div class="publication-title">Loading publications...</div>
+                    <div class="publication-authors">Publications will appear here once data loads.</div>
+                </div>
+            </div>
+            <button class="show-more-btn" id="publications-show-more" style="display: none;">Show more</button>
+        </section> -->
 
-		<script async src="https://www.googletagmanager.com/gtag/js?id=G-3LRBL85CED"></script>
-		<!-- <script src="https://www.google.com/recaptcha/api.js"></script> -->
-		<script>
-			window.dataLayer = window.dataLayer || [];
-			function gtag(){dataLayer.push(arguments);}
-			gtag('js', new Date());
-	
-			gtag('config', 'G-3LRBL85CED');
-		</script>
+        <section class="open-source">
+            <h2>Open Source</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="open-source-carousel">
+                    <div class="repo-card">
+                        <h3>Loading repositories...</h3>
+                        <p>GitHub projects with live stats will appear here once data loads.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
 
+        <section class="talks-videos">
+            <h2>Blogs, Talks & Videos</h2>
+            <div class="carousel-container">
+                <div class="carousel" id="talks-carousel">
+                    <div class="talk-card">
+                        <div class="talk-title">Loading talks and videos...</div>
+                        <div class="talk-type">Content will appear here once data loads.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-		<title>This is me: shakedzy</title>
-        <link rel="shortcut icon" type="image/png" href="https://shakedzy.xyz/favicon.png">
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
-		<link rel="stylesheet" href="assets/css/main.css" />
-		<noscript><link rel="stylesheet" href="assets/css/noscript.css" /></noscript>
-	</head>
-	<body class="is-preload">
-		<div class="top-stripe"></div>
-		<!-- Wrapper -->
-			<div id="wrapper">
+        <section class="online-course">
+            <h2>Online Course</h2>
+            <div class="course-card" id="course-card">
+                <div class="course-content">
+                    <div class="course-title">Loading course information...</div>
+                    <div class="course-description">Course details will appear here once data loads.</div>
+                </div>
+            </div>
+        </section>
 
-				<!-- Header -->
-					<header id="header">
-						<div class="inner">
+        <section class="cssp">
+            <h2>Cute Simple Side Projects</h2>
+            <p style="font-size: 0.9em; color: var(--text-secondary); margin-bottom: 1.5rem;">Some stuff I made for fun</p>
+            <div class="carousel-container">
+                <div class="carousel" id="cssp-carousel">
+                    <div class="cssp-card">
+                        <div class="cssp-title">Loading projects...</div>
+                        <div class="cssp-description">Simple side projects will appear here once data loads.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-							<!-- Logo -->
-								<a href="#" class="logo">
-									<span class="symbol"><img src="favicon.png" alt="" /></span><span class="title">shakedzy.xyz</span>
-								</a>
+        <section class="about">
+            <h2>Photography</h2>
+            <p>I also enjoy photography when I get the time. Here are some of my <a href="https://shakedzy.xyz/photo-gallery/gallery.html" class="photography-link">favorite photos →</a></p>
+        </section>
 
-							<!-- Nav -->
-								<!-- <nav>
-									<ul>
-										<li><a href="#menu">Menu</a></li>
-									</ul>
-								</nav> -->
-
-						</div>
-					</header>
-
-				<!-- Menu
-					<nav id="menu">
-						<h2>Menu</h2>
-						<ul>
-							<li><a href="index.html">Home</a></li>
-						</ul>
-					</nav> -->
-
-				<!-- Main -->
-					<div id="main">
-						<div class="inner">
-							<header>
-								<h1>Hi there, I'm Shaked.</h1>
-								<p>So nice of you to stop by! Here you can find more or less everything I do on my spare time.</p>
-							</header>
-							<section class="tiles">
-								<article class="style1">
-									<span class="image">
-										<img src="images/robot.png" alt="" />
-									</span>
-									<a href="https://shakedzy.medium.com">
-										<h2>Blog</h2>
-										<div class="content">
-											<p>Read my blog posts on Medium</p>
-										</div>
-									</a>
-								</article>
-								<article class="style2">
-									<span class="image">
-										<img src="images/computer.png" alt="" />
-									</span>
-									<a href="https://github.com/shakedzy">
-										<h2>Open Source</h2>
-										<div class="content">
-											<p>See my open repositories on GitHub</p>
-										</div>
-									</a>
-								</article>
-								<article class="style3">
-									<span class="image">
-										<img src="images/headphones.png" alt="" />
-									</span>
-									<a href="https://podcasters.spotify.com/pod/show/the-generators/">
-										<h2>Podcast</h2>
-										<div class="content">
-											<p>Listen to all episodes of The Generators <em>(Hebrew Podcast)</em></p>
-										</div>
-									</a>
-								</article>
-								<article class="style4">
-									<span class="image">
-										<img src="images/books.png" alt="" />
-									</span>
-									<a href="https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser?utm_source=shakedzy&utm_medium=affiliate&utm_campaign=liveproject_zychlinski_real_3_22_22&a_aid=shakedzy&a_bid=17bfd56e">
-										<h2>Online Class</h2>
-										<div class="content">
-											<p>Join my hands-on Recommendation Systems online-course on Manning.com</p>
-										</div>
-									</a>
-								</article>
-                                <article class="style6">
-									<span class="image">
-										<img src="images/camera.png" alt="" />
-									</span>
-									<a href="photo-gallery/gallery.html">
-										<h2>Photos</h2>
-										<div class="content">
-											<p>Explore my favorite shots</p>
-										</div>
-									</a>
-								</article>
-								<article class="style5">
-									<span class="image">
-										<img src="images/tv.png" alt="" />
-									</span>
-									<a href="https://www.youtube.com/shakedzy">
-										<h2>Talks</h2>
-										<div class="content">
-											<p>See my latest talks on YouTube</p>
-										</div>
-									</a>
-								</article>
-							</section>
-							<section>
-								<br>
-								<h2 style="padding-top: 50px; text-align: center;">🎗️ <a href="https://bringthemhomenow.net">Bring Them Home Now!</a></h2>
-							</section>
-						</div>
-					</div>
-
-				<!-- Footer -->
-					<footer id="footer">
-						<div class="inner">
-							
-							<section>
-								<h2>Follow</h2>
-								<ul class="icons">
-									<li><a href="https://www.linkedin.com/in/shakedzy/" class="icon brands style2 fa-linkedin"><span class="label">LinkedIn</span></a></li>
-									<li><a href="https://www.x.com/shakedzy/" class="icon brands style2 fa-x-twitter"><span class="label">X/Twitter</span></a></li>
-									<li><a href="https://github.com/shakedzy" class="icon brands style2 fa-github"><span class="label">GitHub</span></a></li>
-									<li><a href="https://shakedzy.medium.com/" class="icon brands style2 fa-medium"><span class="label">Medium</span></a></li>
-									<li><a href="https://shutterstock.com/g/shakedzy" class="icon solid style2 fa-camera"><span class="label">ShutterStock</span></a></li>
-								</ul>
-							</section>
-							<ul class="copyright">
-								<li>&copy; Shaked Zychlinski. All rights reserved</li><li>Design: <a href="http://html5up.net">HTML5 UP</a></li>
-							</ul>
-						</div>
-					</footer>
-
-			</div>
-
-		<!-- Scripts -->
-			<script src="assets/js/jquery.min.js"></script>
-			<script src="assets/js/browser.min.js"></script>
-			<script src="assets/js/breakpoints.min.js"></script>
-			<script src="assets/js/util.js"></script>
-			<script src="assets/js/main.js"></script>
-
-	</body>
+        <section class="awareness-raising">
+            <div class="awareness-content" id="awareness-content" style="background-color: #fffbc7;">
+                <h2>Awareness</h2>
+                <p>Loading awareness content...</p>
+            </div>
+        </section>
+<!-- 
+        <section class="contact">
+            <h2>Contact</h2>
+            <p>Feel free to reach out if you'd like to work together or just want to say hello.</p>
+            <div class="contact-links">
+                <a href="mailto:hello@shakedy.xyz" class="contact-link">Email</a>
+                <a href="https://github.com" target="_blank" class="contact-link">GitHub</a>
+                <a href="https://linkedin.com" target="_blank" class="contact-link">LinkedIn</a>
+                <a href="https://twitter.com" target="_blank" class="contact-link">Twitter</a>
+            </div>
+        </section> -->
+    </main>
+    
+    <!-- Dark Mode Toggle -->
+    <div class="theme-toggle" id="theme-toggle">
+        <i class="fas fa-sun theme-toggle-icon" id="theme-icon"></i>
+        <span class="theme-toggle-text" id="theme-text">Light</span>
+    </div>
+    
+    <!-- Scripts -->
+    <script src="script.js"></script>
+</body>
 </html>

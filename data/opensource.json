@@ -1,0 +1,358 @@
+[
+  {
+    "id": "github_120195284",
+    "name": "dython",
+    "description": "A set of data tools in Python",
+    "github": "shakedzy/dython",
+    "link": "https://github.com/shakedzy/dython",
+    "language": "Python",
+    "stars": 504,
+    "forks": 100,
+    "updated_at": "2025-07-03T16:06:35Z",
+    "created_at": "2018-02-04T15:07:45Z",
+    "is_fork": false,
+    "topics": [
+      "analysis",
+      "correlation",
+      "data",
+      "modeling",
+      "plot",
+      "python",
+      "roc"
+    ]
+  },
+  {
+    "id": "github_639135539",
+    "name": "companion",
+    "description": "Generative-AI-Powered Foreign-Language Private Tutor",
+    "github": "shakedzy/companion",
+    "link": "https://github.com/shakedzy/companion",
+    "language": "Python",
+    "stars": 150,
+    "forks": 33,
+    "updated_at": "2025-08-26T08:37:06Z",
+    "created_at": "2023-05-10T20:48:40Z",
+    "is_fork": false,
+    "topics": [
+      "generative-ai",
+      "language-learning",
+      "llm",
+      "speech-to-text",
+      "text-to-speech"
+    ]
+  },
+  {
+    "id": "github_123484003",
+    "name": "notebooks",
+    "description": "Some notebooks",
+    "github": "shakedzy/notebooks",
+    "link": "https://github.com/shakedzy/notebooks",
+    "language": "Jupyter Notebook",
+    "stars": 64,
+    "forks": 55,
+    "updated_at": "2024-02-12T19:57:59Z",
+    "created_at": "2018-03-01T19:42:52Z",
+    "is_fork": false,
+    "topics": [
+      "artificial-intelligence",
+      "deep-learning",
+      "genetic-algorithm",
+      "machine-learning",
+      "q-learning",
+      "reinforcement-learning",
+      "uncertainty"
+    ]
+  },
+  {
+    "id": "github_156989853",
+    "name": "tic_tac_toe",
+    "description": "Teaching the computer to play Tic Tac Toe using Deep Q Networks",
+    "github": "shakedzy/tic_tac_toe",
+    "link": "https://github.com/shakedzy/tic_tac_toe",
+    "language": "Python",
+    "stars": 28,
+    "forks": 4,
+    "updated_at": "2025-04-02T04:54:57Z",
+    "created_at": "2018-11-10T14:41:21Z",
+    "is_fork": false,
+    "topics": [
+      "artificial-intelligence",
+      "deep-learning",
+      "deep-neural-networks",
+      "deep-reinforcement-learning",
+      "machine-learning",
+      "q-learning",
+      "reinforcement-learning",
+      "tic-tac-toe"
+    ]
+  },
+  {
+    "id": "github_781165130",
+    "name": "techbyai",
+    "description": "Daily news about tech & AI, brought to you by AI!",
+    "github": "shakedzy/techbyai",
+    "link": "https://github.com/shakedzy/techbyai",
+    "language": "Python",
+    "stars": 7,
+    "forks": 0,
+    "updated_at": "2024-12-03T10:12:58Z",
+    "created_at": "2024-04-02T21:37:04Z",
+    "is_fork": false,
+    "topics": [
+      "agents",
+      "ai",
+      "generative-ai",
+      "llm",
+      "news"
+    ]
+  },
+  {
+    "id": "github_898626969",
+    "name": "nanogpt",
+    "description": "My personal implementation of Andrej Karpathy's NanoGPT, also translated to MLX",
+    "github": "shakedzy/nanogpt",
+    "link": "https://github.com/shakedzy/nanogpt",
+    "language": "Jupyter Notebook",
+    "stars": 3,
+    "forks": 0,
+    "updated_at": "2025-07-01T02:41:55Z",
+    "created_at": "2024-12-04T18:22:35Z",
+    "is_fork": false,
+    "topics": [
+      "from-scratch",
+      "generative-ai",
+      "gpt",
+      "llm",
+      "mlx",
+      "python",
+      "pytorch"
+    ]
+  },
+  {
+    "id": "github_777641126",
+    "name": "eevee-chat",
+    "description": "A unified chat UI for all LLM frameworks. Use ChatGPT, Claude and more in the same conversation!",
+    "github": "shakedzy/eevee-chat",
+    "link": "https://github.com/shakedzy/eevee-chat",
+    "language": "Python",
+    "stars": 2,
+    "forks": 0,
+    "updated_at": "2024-12-31T06:54:21Z",
+    "created_at": "2024-03-26T08:38:05Z",
+    "is_fork": false,
+    "topics": [
+      "app",
+      "chatbot",
+      "llm"
+    ]
+  },
+  {
+    "id": "github_198878264",
+    "name": "jupyter-notebook-default-cell",
+    "description": "Create a default cell in Jupyter notebooks",
+    "github": "shakedzy/jupyter-notebook-default-cell",
+    "link": "https://github.com/shakedzy/jupyter-notebook-default-cell",
+    "language": "JavaScript",
+    "stars": 2,
+    "forks": 0,
+    "updated_at": "2021-12-21T17:59:38Z",
+    "created_at": "2019-07-25T17:55:34Z",
+    "is_fork": false,
+    "topics": []
+  },
+  {
+    "id": "github_709995558",
+    "name": "breathing-timer",
+    "description": "A simple breathing timer web app",
+    "github": "shakedzy/breathing-timer",
+    "link": "https://github.com/shakedzy/breathing-timer",
+    "language": "JavaScript",
+    "stars": 1,
+    "forks": 0,
+    "updated_at": "2025-07-19T13:54:39Z",
+    "created_at": "2023-10-25T19:46:06Z",
+    "is_fork": false,
+    "topics": []
+  },
+  {
+    "id": "github_906920776",
+    "name": "screen-reader",
+    "description": "Extracting complete webpage articles from a screen recording using local models",
+    "github": "shakedzy/screen-reader",
+    "link": "https://github.com/shakedzy/screen-reader",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated_at": "2025-06-10T01:14:17Z",
+    "created_at": "2024-12-22T10:06:27Z",
+    "is_fork": false,
+    "topics": [
+      "ai",
+      "llm",
+      "local-models",
+      "vision"
+    ]
+  },
+  {
+    "id": "github_859708301",
+    "name": "4kids",
+    "description": "Python apps for kids, built for Raspberry Pi",
+    "github": "shakedzy/4kids",
+    "link": "https://github.com/shakedzy/4kids",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated_at": "2024-09-26T04:17:01Z",
+    "created_at": "2024-09-19T06:29:56Z",
+    "is_fork": false,
+    "topics": []
+  },
+  {
+    "id": "github_775468818",
+    "name": "toolbox",
+    "description": "A bunch of tools in Python I find useful",
+    "github": "shakedzy/toolbox",
+    "link": "https://github.com/shakedzy/toolbox",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated_at": "2024-03-21T17:03:08Z",
+    "created_at": "2024-03-21T12:57:06Z",
+    "is_fork": false,
+    "topics": [
+      "python",
+      "tools",
+      "utilities"
+    ]
+  },
+  {
+    "id": "github_141569687",
+    "name": "newtab",
+    "description": "New tab extension for Chrome",
+    "github": "shakedzy/newtab",
+    "link": "https://github.com/shakedzy/newtab",
+    "language": "Python",
+    "stars": 1,
+    "forks": 0,
+    "updated_at": "2023-10-31T15:12:51Z",
+    "created_at": "2018-07-19T11:25:19Z",
+    "is_fork": false,
+    "topics": [
+      "chrome-extension",
+      "new-tab-page"
+    ]
+  },
+  {
+    "id": "github_585936720",
+    "name": "jc-podcast",
+    "description": "Home of our JC Podcast",
+    "github": "shakedzy/jc-podcast",
+    "link": "https://github.com/shakedzy/jc-podcast",
+    "language": "SCSS",
+    "stars": 1,
+    "forks": 1,
+    "updated_at": "2023-07-02T07:25:35Z",
+    "created_at": "2023-01-06T13:49:41Z",
+    "is_fork": false,
+    "topics": []
+  },
+  {
+    "id": "github_121650177",
+    "name": "pycharles",
+    "description": "A simple Python implementation of genetic model algorithm",
+    "github": "shakedzy/pycharles",
+    "link": "https://github.com/shakedzy/pycharles",
+    "language": "Python",
+    "stars": 1,
+    "forks": 2,
+    "updated_at": "2021-06-03T08:09:21Z",
+    "created_at": "2018-02-15T16:08:20Z",
+    "is_fork": false,
+    "topics": [
+      "genetic-algorithm",
+      "genetic-models"
+    ]
+  },
+  {
+    "id": "github_188911002",
+    "name": "shakedzy.github.io",
+    "description": "My personal landing page",
+    "github": "shakedzy/shakedzy.github.io",
+    "link": "https://github.com/shakedzy/shakedzy.github.io",
+    "language": "CSS",
+    "stars": 0,
+    "forks": 0,
+    "updated_at": "2025-08-27T01:14:17Z",
+    "created_at": "2019-05-27T21:26:40Z",
+    "is_fork": false,
+    "topics": [
+      "landing-page"
+    ]
+  },
+  {
+    "id": "github_1032574854",
+    "name": "bad-luck-yuval",
+    "description": "💰 Help Yuval avoid the money! 💵",
+    "github": "shakedzy/bad-luck-yuval",
+    "link": "https://github.com/shakedzy/bad-luck-yuval",
+    "language": "HTML",
+    "stars": 0,
+    "forks": 0,
+    "updated_at": "2025-08-05T14:16:43Z",
+    "created_at": "2025-08-05T14:00:55Z",
+    "is_fork": false,
+    "topics": [
+      "fun",
+      "game"
+    ]
+  },
+  {
+    "id": "github_1032427807",
+    "name": "jump-up",
+    "description": "Web-based kids-friendly multiplayer game based on Chrome's Dino",
+    "github": "shakedzy/jump-up",
+    "link": "https://github.com/shakedzy/jump-up",
+    "language": "JavaScript",
+    "stars": 0,
+    "forks": 1,
+    "updated_at": "2025-08-05T09:57:49Z",
+    "created_at": "2025-08-05T09:41:06Z",
+    "is_fork": false,
+    "topics": [
+      "game",
+      "kids"
+    ]
+  },
+  {
+    "id": "github_914406886",
+    "name": "models-watcher",
+    "description": "An automated bot notifying about new models on Hugging Face via Telegram",
+    "github": "shakedzy/models-watcher",
+    "link": "https://github.com/shakedzy/models-watcher",
+    "language": "Python",
+    "stars": 0,
+    "forks": 0,
+    "updated_at": "2025-02-10T05:11:51Z",
+    "created_at": "2025-01-09T14:37:16Z",
+    "is_fork": false,
+    "topics": [
+      "huggingface",
+      "models",
+      "watcher"
+    ]
+  },
+  {
+    "id": "github_293458096",
+    "name": "shakedzy",
+    "description": "GitHub Profile Readme",
+    "github": "shakedzy/shakedzy",
+    "link": "https://github.com/shakedzy/shakedzy",
+    "language": "Unknown",
+    "stars": 0,
+    "forks": 1,
+    "updated_at": "2025-01-21T14:15:28Z",
+    "created_at": "2020-09-07T07:46:33Z",
+    "is_fork": false,
+    "topics": []
+  }
+]

@@ -1,0 +1,142 @@
+{
+  "_comment": "📝 EDIT THIS FILE TO UPDATE YOUR WEBSITE CONTENT",
+  
+  "personal": {
+    "name": "Shaked Zychlinski",
+    "title": "Data Scientist & AI Engineer",
+    "bio": "Born and raised on Earth",
+    "github_username": "shakedzy",
+    "medium_username": "shakedzy", 
+    "youtube_channel": "shakedzy"
+  },
+
+  "awareness": {
+    "title": "🎗️🇮🇱 BRING THEM HOME NOW!",
+    "content": "",
+    "links": [
+      {
+        "text": "Learn more →",
+        "url": "https://bringthemhomenow.net/"
+      }
+    ]
+  },
+
+  "publications": [
+    {
+      "title": "A Whole New World: Creating a Parallel-Poisoned Web Only AI-Agents Can See",
+      "journal": "White-paper",
+      "year": "2025",
+      "link": "https://arxiv.org/abs/2509.00124",
+      "authors": ["Shaked Zychlinski"],
+      "my_author_position": 1      
+    },
+    {
+      "title": "Visual Representation for Capturing Creator Theme in Brand-Creator Marketplace",
+      "journal": "ACM RecSys 23",
+      "year": "2023",
+      "link": "https://dl.acm.org/doi/10.1145/3604915.3610237",
+      "authors": ["Sarel Duanis", "Keren Gaiger", "Ravid Cohen", "Shaked Zychlinski", "Asnat Greenstein-Messica"],
+      "my_author_position": 4
+    }
+  ],
+
+  "online_course": {
+    "title": "Real-World Deep Learning Recommender System",
+    "platform": "Manning",
+    "description": "Bridge the gap between the recommender system theory you’ve learned and the hands-on experience you need. This liveProject series provides a deep dive into real-world data management in industrial applications that’s truly rare in learning resources. Developing real-world recommendation systems is much more than understanding...",
+    "link": "https://www.manning.com/liveprojectseries/deep-learning-recommender-system-ser?utm_source=shakedzy&utm_medium=affiliate&utm_campaign=liveproject_zychlinski_real_3_22_22&a_aid=shakedzy&a_bid=17bfd56e",
+    "logo_url": "https://images.manning.com/356/474/resize/liveProjectSeries/1/b45d1cd-9618-4565-ae16-19b0e1c1d910/MNLS2021437_Cover_Real-WorldDeepLearningRecommenderSystem.jpg",
+    "highlights": [
+      "Production-oriented Data Science",
+      "Real-world case studies",
+      "Recommendation Systems",
+      "Learn at your own pace", 
+      "Tensorflow"
+    ]
+  },
+
+  "showcase_repositories": {
+    "selected": [
+      "dython",
+      "companion", 
+      "techbyai"
+    ],
+    "custom_descriptions": {
+      "dython": "A comprehensive set of data analysis and machine learning tools in Python",
+      "companion": "AI-powered foreign language tutor built with generative AI",
+      "techbyai": "Automated daily tech & AI news aggregator powered by artificial intelligence"
+    },
+    "max_display": 6
+  },
+
+  "manual_talks": [
+    {
+      "title": "New Invisible Attack Creates Parallel Poisoned Web Only for AI Agents", 
+      "platform": "JFrog Blog",
+      "type": "Article",
+      "date": "2025-09-04",
+      "link": "https://jfrog.com/blog/parallel-poison-web-for-ai-agents/",
+      "description": "Latest application security research reveals new attack vectors on AI Agents which serves them completely different content on the...",
+      "views": null,
+      "icon": "fa-solid fa-blog"
+    },
+    {
+      "title": "Taking a GenAI Project to Production", 
+      "platform": "JFrog Blog",
+      "type": "Article",
+      "date": "2024-06-10",
+      "link": "https://jfrog.com/blog/taking-a-genai-project-to-production/",
+      "description": "Generative AI and Large Language Models (LLMs) are the new revolution of Artificial Intelligence, bringing the world capabilities that we could only dream about less than two years ago. Unlike...",
+      "views": null,
+      "icon": "fa-solid fa-blog"
+    }
+  ],
+  "manual_podcast_guests": [],
+
+  "content_sources": {
+    "medium": {
+      "enabled": true,
+      "username": "shakedzy",
+      "language": "en"
+    },
+    "youtube": {
+      "enabled": true,
+      "playlists": {
+        "Talks [English]": "en",
+        "Talks [Hebrew]": "he"
+      }
+    },
+    "spotify": {
+      "enabled": true,
+      "podcasts": [
+        {
+          "name": "המחוללים (The Generators)",
+          "url": "https://creators.spotify.com/pod/profile/the-generators/",
+          "language": "he",
+          "description": "Hebrew AI podcast by Shaked Zychlinski and Doron Shadeh"
+        }
+      ]
+    },
+    "blogs": []
+  },
+  "cssp": [
+    {
+      "name": "Jump Up",
+      "description": "🎮 Web-based kids-friendly multiplayer game based on Chrome's Dino", 
+      "icon": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>",
+      "link": "https://shakedzy.xyz/jump-up/"
+    },
+    {
+      "name": "Bad Luck Yuval",
+      "description": "Help Yuval avoid the money! 💵💰", 
+      "icon": "https://raw.githubusercontent.com/shakedzy/bad-luck-yuval/refs/heads/main/the-yuval.png",
+      "link": "http://shakedzy.xyz/bad-luck-yuval/"
+    },
+    {
+      "name": "Breathing Timer",
+      "description": "A simple breathing timer web app", 
+      "icon": "https://raw.githubusercontent.com/shakedzy/breathing-timer/refs/heads/main/favicon.png",
+      "link": "https://shakedzy.xyz/breathing-timer/"
+    }
+  ]
+}
