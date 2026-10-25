@@ -1,7 +1,6 @@
 import os
 import pathlib
 from datetime import datetime
-from PIL import Image, ExifTags
 from typing import List
 
 
