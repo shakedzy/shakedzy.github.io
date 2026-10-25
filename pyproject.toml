@@ -6,5 +6,5 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "exifread>=3.5.1",
-    "pillow>=12.2.0",
+    "pillow>=12.3.0",
 ]
